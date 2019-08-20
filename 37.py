@@ -18,8 +18,8 @@ while True:
     if v1=='Q' or v1=='q':
         break
     elif v1=='+':
-        n1=int(input('Enter First Num: '))
-        n2=int(input('Enter Second Num: '))
+        n1=int(input('Enter First Num: ')) 
+        n2= int(input('Enter Second Num: ')) 
         print('你的答案是：'+myadd(n1,n2))
     elif v1=='-':
         n1=int(input('Enter First Num: '))

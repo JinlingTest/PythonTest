@@ -1,0 +1,12 @@
+v1=('a','b','c')
+v2='a','b','c'
+print(v1)
+print(v2)
+print(v1[1])
+print(v2[2])
+v10=[]
+v20={}
+v30=()
+print(v10)
+print(v20)
+print(v30)
