@@ -1,0 +1,12 @@
+v1=[0,1,2,3,4,5,6,7,8,9,10]
+print(v1[2])
+print(v1[2:8])
+print(v1[2:8:3])
+print('-------')
+print(v1[8:2:-1])
+print(v1[8:2])
+print(v1[:6])
+print(v1[7:])
+print(v1[::-1])
+v1.reverse()
+print(v1)
