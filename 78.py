@@ -1,0 +1,9 @@
+v1=[1,2,'A']
+v1.append('Hi')
+print(v1)
+v1.append('Hi')
+print(v1)
+v1.append('Hi')
+print(v1)
+v1.append('Hi')
+print(v1)
