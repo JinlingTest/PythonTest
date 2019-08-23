@@ -1,0 +1,115 @@
+微软管理控制台 MMC
+任务管理器
+
+帐户管理 
+本地帐户/组
+工作组架构 workgroup  small  分布式  （简单文件打印服务）
+每台计算机都有本地安全帐户数据库 SAM DB
+
+内置本地用户帐号 （可改名、禁用  不可删除）
+Administrator权限最高
+Guest	来宾	 权限最低
+
+内置本地组帐号
+Administrators
+Backup Operators  Backup/Restore  
+Performance Monitor Users 
+Network Configuration Operators
+Users 所有用户属于改组 基本权利 （执行应用程序 打印 锁定 不能共享 关机）
+Remote Desktop Users
+
+特殊组
+everyone 任何人
+Network  任何一个通过网络登录此计算机的用户
+Interactive  任何一个通过[C+A+D]登录此计算机的用户
+anonymous 匿名
+authenticated Users
+Dialup
+
+
+
+帐户名 大小写不敏感
+密码 敏感 默认6个字符 不能包含帐户名 至少包含A-Z，a-z，0-9，符号($!#%)
+01xyMN
+123456
+默认42天
+
+
+关于密码改动
+1首先用户应该在密码到期前用CAD 更改
+2当忘记密码 用事先做好的密码重置盘 自己重置密码
+3管理员设置密码 原先该用户加密的文件/邮件 都无法访问
+
+管理员修改本地帐号
+设置密码
+
+
+
+域架构     domain     big    集中制  （域控制器）
+计算机可以加入域
+域里有一个集中式数据库  目录数据库
+Active Directory Domain Service  AD DS
+
+N台  高可用HA domain controller 域控制器  （AD DS）
+member server  成员服务器
+
+命名空间
+Domain Name Service  DNS（TCPIP网络中进行名称解析）
+
+TCPIP ----Internet(root top L2  host)==www.google.com.
+
+AD域名 使用了类似 internet域名
+example.com
+abc.local
+
+计算机全名 =计算机名+DNS后缀
+win01.example.com
+DNS支持 自荐DNS 127.0.0.1 （安装过程关联安装DNS）
+
+域 Forest--Tree--Domain    单个example.com （森林）
+域 Forest--Domain    单个example.com （森林根域）
+第一台DC win01.example.com  (DC /DNS)
+192.168.0.10/255.255.255.0 DNS 127.0.0.1
+第二台DC win02.example.com  (DC )
+192.168.0.20/255.255.255.0 DNS 192.168.0.10
+
+
+拥有本地帐号 WIN03本地帐号 登录win03服务器
+作为成员 可以使用域帐号登录 win03服务器
+成员服务器
+win03服务器 
+192.168.0.30/255.255.255.0 DNS 192.168.0.10
+
+win04服务器 
+192.168.0.40/255.255.255.0 DNS 192.168.0.10
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

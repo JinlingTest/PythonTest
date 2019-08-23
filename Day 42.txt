@@ -1,0 +1,269 @@
+错误---程序无法继续执行
+
+ImportError
+IndexError
+NameError
+SyntaxError
+TypeError
+ValueError
+ZeroDivisionError
+OSError
+
+处理异常
+try:
+ 
+except:
+try:
+    print(1)
+    7/0
+    print(2)
+except TypeError:
+    print(111111111)
+
+finally:
+    print(222222)
+
+    
+
+
+"""
+except  TypeError:
+    print('AAAAAA')
+except  ZeroDivisionError:
+    print('OOOOO')
+"""
+
+try:
+    print(1)
+    raise NameError("This Is Invalide name！！")
+    print(2)
+except NameError:
+    print(3333)
+	
+	
+	
+AssertionError	
+	
+assert	
+print(1)
+assert 1==1
+print(2)
+print(21)
+assert 1==2,'This is False'
+print(3)
+print(31)
+
+
+File
+函数 open('filename','r')
+	 open('filename','w')
+	 open('filename','a')
+	 open('filename','rb')
+方法 read
+     readlines
+	 close
+	 
+	 
+	 
+v1=open('f02.txt','r')
+print(v1.read(10))
+print(v1.read(10))
+print(v1.read(20))
+#print(open('f01.txt','r').read()
+v1.close()
+
+#v1=open('f01.txt','w')
+v1=open('f02.txt','a')
+v1.write('aaaaaa')
+v1.close()
+
+	 
+	 
+print	 
+
+
+
+
+
+v1=open('f02.txt','w')
+message1='hello python'
+
+v1.write(message1)==message1
+v1.write(message1)==True
+v1.write(message1)==len(message1)
+
+finally:
+  file.close()
+
+with 结束后自动关闭文件 （as后临时变量
+with open('f01.txt','r') as v1:
+    print(v1.read())
+	
+	
+整数 int
+浮点 字符 
+列表 [ ， ， ，]
+
+字典{'key':'value','key':'value',......}
+
+
+v1={'alice':20,'bob':18,'chralie':21,'david':22}
+v2={"alice":20,'bob':18,"chralie":21,"david":22}
+v3={"alice":"F","bob":'M',"chralie":"M","david":"M"}
+print(v1['alice'])
+print(v3['alice'])
+print(v3['edward'])
+print(list(v3))
+print(list(v3.values()))
+
+print(v1)
+print(v2)
+print(v3)
+
+try:
+    color={'red':[255,0,0],'green':[0,255,0],'blue':[0,0,255]}
+    print(color['red'])
+    print(color['red'][0])
+    print(color['yellow'])
+except KeyError:
+    print('所取键名有误')
+
+
+字典{'key':'value','key':'value',......}
+key 整数 字符串 
+value----整数 字符 列表
+v1={101:10,102:10,103:12}
+print(v1[101])
+
+
+不可变对象 整数 字符 元组
+可变对象   list dictionaries
+
+字典的键(key)只能是不可变对象
+
+v
+print
+try:
+    color={'red':[255,0,0],'green':[0,255,0],'blue':[0,0,255]}
+    print(color['red'])
+    print(color['green'])
+    print(color['blue'])
+    print(color['yellow'])
+except KeyError:
+    print('所取键yellow有误 开始添加')
+    if 'yellow' not in color:
+        color['yellow']=[0,255,255]
+
+
+v1=('a','b','c')
+v2='a','b','c'
+print(v1)
+print(v2)
+print(v1[1])
+print(v2[2])
+v10=[]
+v20={}
+v30=()
+print(v10)
+print(v20)
+print(v30)
+
+有 None  不存在 Null
+def fun1():
+    print(1111111)
+
+v1=fun1()
+print(v1)
+
+
+
+def fun2():
+    return 10
+
+v2=fun2()
+print(v2)
+
+
+
+
+tuple
+元组和列表类似
+不同点 元组是不可变对象
+v1=(1,3,5,7,9)
+v2=(1,'A',3,'C')
+print(v1)
+print(v2)
+print(v1[0])
+print(v2[2])
+v2[2]=30
+TypeError: 'tuple' object does not support item assignment
+
+list=[1,2,3,'a','b','v']
+dict={key1:value,key:value}
+tuple=(1,2,3,'A')
+
+元组速度比列表快 缺点不能修改
+v1=(1,(1,2),3,[4,5,(6,7)],{1:10,2:20})
+print(v1[1])
+print(v1[3][1])
+v1[3][1]=50
+print(v1[3][1])
+v1[3][2]=6,7,8
+print(v1[3][2])
+print(v1[3][2][2])
+#v1[3][2][2]=88
+v1[4][1]=12
+print(v1)
+
+
+range(1,10)
+v1[2:8] 切片和range类似 ：第一个索引位置包含 后一个索引位置不含
+v1=[0,1,2,3,4,5,6,7,8,9,10]
+print(v1[2])
+print(v1[2:8])
+print(v1[2:8:3])
+print('-------')
+print(v1[8:2:-1])
+print(v1[8:2])
+print(v1[:6])
+print(v1[7:])
+print(v1[::-1])
+v1.reverse()
+print(v1)
+
+
+字符串函数
+UPPER
+LOWER
+	v1='Hello World'
+print(v1.replace('World','Python'))
+print(v1)
+print(v1.upper())
+print(v1.lower())
+print(v1)
+
+print(v1.startswith('AAA'))
+print(v1.startswith('He'))
+print(v1.endswith('ld'))
+
+#list
+#join使用一个字符串 作为分隔符 来连接一个字符列表
+v1=['hello','world','python','java']
+v2=','
+v3=v2.join(v1)
+print(v3)
+
+print('\t'.join(['A','B','C']))
+print('\n'.join(['A','B','C']))
+print(','.join(['A','B','C']))
+print(' '.join(['A','B','C']))
+
+
+
+
+	
+	
+	
+	
+	
+	

@@ -1,0 +1,168 @@
+计划任务																at
+at
+cron
+systemctl list-units --type=service|grep -e atd -e cron
+atd.service                        loaded active running Job spooling tools
+crond.service                      loaded active running Command Scheduler
+
+at	atq
+crond
+crontab -e
+min  hour  day month  DY  command
+10   14    5    6     *   /root/a.sh
+01    2     10   *    *   /root/b.sh
+02    2     *   *    7   /root/c.sh
+00    */3   *   7-8   *   /root/d.sh
+2,5-10,20 8 *   Jan    Mon   /root/e.sh
+
+01    2     10   *    *   /root/b.sh
+
+
+
+f1 owner/group
+f1 u1 u1 rwxrw-r--
+john117 rw
+
+r=4
+w=2
+x=1
+rw-  6
+rwx (7)
+
+ACL
+
+
+MBR(传统BIOS) 32bit   4(4primary 1extend(Logic driver))15vol 
+	  2.2TB  2.0TiB
+GPT(UEFI)  64bit 128Partition 8ZiB  64ZiB
+
+fdisk
+n新建
+w保存并退出
+p查看
+
+partprobe /dev/sdb
+
+gdisk
+/etc/fstab
+32bit
+
+Disk(/dev/sdb)----N Partition(8e)--N PV----1VG----M LV--mkfs----mount point  (data1)
+
+LVM 
+PV----VG----LV
+
+Script
+bash
+python
+1 2 3
+
+[ClearWindow]
+enable=1
+enable_editor=0
+enable_shell=1
+[ClearWindow_cfgBindings]
+clear-window=<Control-Key-l>
+
+https://bugs.python.org/file14303/ClearWindow.py
+
+
+Variables
+x=x+100   x+=100
+x=x-200   x-=200
+x=x/2     x/=2
+
+Ctrl-N
+
+x=30
+x*=3
+print(x)
+
+Ctrl-S
+
+F5
+
+v1=input('请你输入一个数字：')
+v2=input('请你再输入一个数字：')
+print('两个数字之和是：' +str(int(v1)+int(v2)))
+
+
+控制结构
+布尔 True False 
+>>> 2==2
+True
+>>> 'A'=='a'
+False
+
+if expression:
+   statement
+   
+   用缩进 是必须的
+
+if expression:
+   statement1
+   if expression
+		sub-statement1
+		sub-statement2
+   statement3
+   
+out-statement   
+
+ELSE
+v1=input('PLS Input a NUm: ')
+
+if int(v1)>0:
+    print(v1+"大于零")
+    if int(v1)>100:
+        print(v1+"大于一百")
+else:
+    if int(v1)<0:
+        print(v1+"小于零")
+    else:
+        print(v1+"等于零")  
+
+print('判断完毕')   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		

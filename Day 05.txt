@@ -1,0 +1,99 @@
+磁盘管理
+
+disk--partition--format(NTFS)
+
+partition table(分区的起始和结束位置  活动)
+
+分区形式
+旧 MBR磁盘分区形式 2TB以下 分区表位于磁盘前段
+新 GPT磁盘分区形式 2TB以上 分区表位于磁盘次前段(在前段留有空间保留MBR形式PT数据)
+
+空盘 GPT<--->MBR
+
+与硬件--主板---CMOS--固件 BIOS（传统BIOS     UEFI BIOS）
+
+windows 基本磁盘/动态磁盘(效率 容错)
+
+基本磁盘
+
+MBR 4分区(4主分区/1扩展分区) 3primary+1extend （细分逻辑驱动器）
+新磁盘： 脱机（联机）没有初始化（初始化 MBR/GPT）
+partition----分配驱动器号---格式化
+
+初始化 GPT 128主分区   不需要扩展分区和逻辑驱动器 
+
+1volume---1 partition
+1volume---N partition
+
+
+MBR (小主分区 无驱动器号  系统保留分区 存放启动文件 bootmgr)
+	(分区 C盘 启动分区     存放系统文件 c:\windows)
+	
+GPT (2个小主分区 无驱动器号  系统分区(EFI启动文件)  保留分区Microsoft System Reserved) 
+(分区 C盘 启动分区     存放系统文件 c:\windows)
+
+命令行 diskpart
+基本磁盘--基本卷
+
+动态磁盘--简单卷
+扩展 （如果隔一个分区扩展 在其他磁盘扩展 成为“跨区卷”）
+
+简单卷  1VOL--1Partition
+跨区卷  1VOL--N Partition （多块动态磁盘）
+带区卷  1VOL--N Partition （一个盘只会有该卷1Part ） partition尺寸一致
+
+
+
+V Raid5  容错 1    N-1 
+U mirror 容错      50%
+T 带区卷 性能 无容错
+S 跨区   容量 无容错
+K 简单   
+
+
+FC SAN Cluster
+iSCSI SAN Cluster
+10gigabit+iscsi initiator=iSCSI HBA(firmware存放启动器+CPU)
+
+目标 target ----存储   (将存储可以称为目标服务器)
+
+集群  某些节点故障 可以继续服务
+
+如果有太多节点故障 集群停止服务
+
+集群可以容忍多少节点故障---------quorum configuration 仲裁配置
+见证磁盘---quorum disk
+
+1.节点多数  奇数节点
+1.节点+quorum磁盘 偶数节点
+
+
+
+iSCSI SAN 2节点 文件服务器故障转移集群 (quorum磁盘)
+资源
+域
+1台DC win01.example.com
+2节点 域中2成员 win02/win03
+1台存储 win04(GROUP) + target服务器软件
+
+
+
+iSCSI存储网络
+虚拟交换机Vmnet3（仅本地 192.168.3.0 关闭DHCP）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

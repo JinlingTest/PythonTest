@@ -1,0 +1,555 @@
+﻿shell是命令解释器
+低级语言 
+       机器语言：二进制语言    Bug
+	   汇编语言
+高级语言
+		静态---编译语言    	c  c++  java  源码---（编译器gcc GNU cc ）---可执行代码
+										make命令
+		动态---解释性语言  python perl php      shell （）
+shell命令
+ls cp mv yum rm file find locate which free cat more 。。。。。
+
+Shell脚本
+shell命令+变量+条件控制+循环控制+其他
+ 1.简单例子
+#!/usr/bin/bash
+# Author : Jin
+# Date: 20190805
+# Modify: V0.1
+
+ls /root &>/dev/null
+mkdir -p /lesson1
+touch /lesson1/file1
+echo "hello" > /lesson1/file1
+
+执行
+1 .  chmod a+x test.sh 
+      绝对路径文件名  /root/test.sh
+	  test.sh 
+	  bash: test.sh: 未找到命令...
+	  ./test.sh
+2. 
+[root@s55 ~]# /usr/bin/bash test.sh
+[root@s55 ~]# bash test.sh
+[root@s55 ~]# sh test.sh
+[root@s55 ~]# source test.sh	  
+[root@s55 ~]# bash < test.sh
+[root@s55 ~]# cat test.sh | bash
+	  
+
+
+
+
+ 2.变量 
+ 变量名
+ 大小写字母 下划线 数字 
+ 字母开头
+ 建议大写
+ 赋值 使用= 号 两边没有空格
+ 变量 存储 数值 和 字符 
+ 如果存储字符 用引号  单双均可
+ 调用变量 用 $
+ 变量要计算 用 ${}
+
+变量的分类
+1自定义
+2环境：保存和系统操作环境相关的变量
+			（/etc/profile  /etc/bashrc）
+			(~/.bash_profile  ~/.bashrc)
+env查看
+环境变量中一般使用export命令定义全局变量
+1.全局 在当前和子shell中均可使用
+2.局部
+测试 几个 profile和bashrc顺序
+  120  echo "echo 'this is bash_profile'" >> /etc/profile
+  121  echo "echo 'this is bashrc'" >> /etc/bashrc 
+  122  echo "echo 'this is root bash_profile'" >> /root/.bash_profile 
+  123  echo "echo 'this is root bashrc'" >> /root/.bashrc 
+得到结果
+Last login: Mon Aug  5 11:07:18 2019 from 192.168.0.1
+this is bash_profile
+this is bashrc
+this is root bashrc
+this is root bash_profile
+
+sed -i '/^echo/d' /etc/profile
+sed -i '/^echo/d' /etc/bashrc 
+sed -i '/^echo/d' /root/.bash_profile 
+sed -i '/^echo/d' /root/.bashrc	
+PATH变量 是命令查询路径
+	
+3位置
+命令 参数1 参数2 参数3
+$0    $1      $2      $3
+[root@s55 ~]# cat test21.sh 
+#!/usr/bin/env bash
+ping -c2 $1
+ping -c3 $2
+[root@s55 ~]# cat test22.sh 
+#!/usr/bin/env bash
+
+echo $1
+echo $2
+echo $3
+[root@s55 ~]# cat test23.sh 
+#!/usr/bin/bash
+
+echo `expr $1 + $2`
+
+${1}.....${9}  ${10}
+
+4预定义
+$*  所有的位置变量值
+$#  个数
+$$  PID
+$?   返回状态值 0 OK 
+$!  
+
+#!/usr/bin/env bash
+
+echo $1
+echo $2
+echo $*
+echo $#
+echo $$
+echo $?
+
+-------------------------------
+数学运算 + - * /
+expr 参数1 参数2 参数3
+expr num1 + num2
+expr num1 - num2
+expr num1 \* num2
+expr num1 \/ num2
+
+[root@s55 ~]# expr 1 - 2
+-1
+[root@s55 ~]# expr 1 * 2
+expr: 语法错误
+[root@s55 ~]# expr 1 \* 2
+2
+[root@s55 ~]# expr 3 \* 2
+6
+[root@s55 ~]# expr 6 / 2
+3
+[root@s55 ~]# expr 6 \/ 2
+3
+
+
+逻辑判断
+[root@s55 ~]# expr 20 \> 10
+1
+[root@s55 ~]# expr 20 \> 70
+0
+[root@s55 ~]# expr 20 \= 70
+0
+[root@s55 ~]# expr 70 \= 70
+1 
+
+变量的替换
+V1='I love you,Do you love me'
+$V1
+${V1}
+[root@s55 ~]# echo $V1
+I love you,Do you love me
+[root@s55 ~]# echo ${V1#*ov}
+e you,Do you love me
+[root@s55 ~]# echo ${V1##*ov}
+e me
+[root@s55 ~]# echo ${V1%ov*}
+I love you,Do you l
+[root@s55 ~]# echo ${V1%%ov*}
+I l
+[root@s55 ~]# echo ${V1/love/like}
+I like you,Do you love me
+[root@s55 ~]# echo ${V1//love/like}
+I like you,Do you like me
+#删除一个 从头
+##全删除 从头
+${变量#规则}
+${变量##规则}
+%删除 从尾
+%%全删除 从尾
+${变量%规则}
+${变量%%规则}
+
+${变量/？/？}
+${变量//？/？}
+
+2 计算字符串长度 两种语法
+[root@s55 ~]# echo ${V1}
+I love you,Do you love me
+[root@s55 ~]# echo ${#V1}
+[root@s55 ~]# expr length "$V1"
+25
+[root@s55 ~]# expr length "gjfeksjgkldsfg"
+14
+[root@s55 ~]# expr length gjfeksjgkldsfg
+14
+[root@s55 ~]# expr length gjfek sjg kldsfg
+expr: 语法错误
+[root@s55 ~]# expr length "gjfek sjg kldsfg"
+16
+
+3.查询字符串位置
+[root@s55 ~]# echo ${V1}
+I love you,Do you love me
+[root@s55 ~]# echo ${V2}
+love
+[root@s55 ~]# expr index ${V1} ${V2}
+expr: 语法错误
+[root@s55 ~]# expr index "${V1}" "${V2}"
+3
+
+4.从字符串取值
+[root@s55 ~]# echo ${V1}
+I love you,Do you love me
+[root@s55 ~]# echo ${V1:0}
+I love you,Do you love me
+[root@s55 ~]# echo ${V1:4}
+ve you,Do you love me
+[root@s55 ~]# echo ${V1:4:5}
+ve yo
+[root@s55 ~]# expr substr ${V1} 4 5
+expr: 语法错误
+[root@s55 ~]# expr substr "${V1}" 4 5
+ove y
+[root@s55 ~]# echo `expr substr "${V1}" 4 5`
+ove y
+
+
+脚本
+1.显示一句话 Cloud Computer Automatic Devs process framework is Ansible,Ansible is a Open Source Software.
+2.紧跟一个菜单
+    （1）显示该句子长度
+	  (2)  删除所有Ansible
+	  (3)  将Ansible替换为Jinkens
+	  (4)  将所有Ansible替换为Jinkens
+	  (5)  退出
+
+模块化
+1. 显示菜单  print_menu
+2.显示该句子长度 print_long
+3. 删除所有Ansible   del_ansibel
+4. 将Ansible替换为Jinkens   change_ansible
+5. 将所有Ansible替换为Jinkens change_all_ansible
+
+
+[root@s55 ~]# vi exam01.sh
+
+#!/usr/bin/env bash
+
+echo "Cloud Computer Automatic Devs process framework is Ansible,Ansible is a Open Source Software"
+
+function print_menu
+{
+#!/usr/bin/env bash
+
+MyStrings="Cloud Computer Automatic Devs process framework is Ansible,Ansible is a Open Source Software"
+echo ${MyStrings}
+function print_menu
+{
+echo "==============Menu=============="
+echo "(1)显示该句子长度"
+echo "(2)  删除所有Ansible"
+echo "(3)  将Ansible替换为Jinkens"
+echo "(4)  将所有Ansible替换为Jinkens"
+echo "(5)  退出"
+}
+print_menu
+
+print_long
+{
+echo ${#MyStrings}
+change_all_ansible{}
+echo "(5)  退出"
+}
+print_menu
+
+print_long
+{
+echo ${#MyStrings}
+}
+
+del_ansibel
+{
+echo "==============Menu=============="
+echo "(1)显示该句子长度"
+echo "(2)  删除所有Ansible"
+echo "(3)  将Ansible替换为Jinkens"
+echo "(4)  将所有Ansible替换为Jinkens"
+echo "(5)  退出"
+}
+print_menu
+
+print_long
+{
+echo ${#MyStrings}
+}
+
+del_ansibel
+{
+echo ${MyStrings//Ansible/} 
+}
+echo ${#MyStrings}
+}
+
+del_ansible
+{
+echo ${MyStrings//Ansible/}
+}
+
+print_menu
+
+print_long()
+{
+echo ${#MyStrings}
+}
+
+function del_ansible
+{
+echo ${MyStrings//Ansible/}
+}
+
+function change_ansible
+{
+echo ${MyStrings/Ansible/Jinkens}
+}
+function change_all_ansible
+{
+echo ${MyStrings//Ansible/Jinkens}
+}
+
+
+print_long
+del_ansible
+change_ansible
+change_all_ansible
+======
+学习 三个技术点
+1 read 读取用户输入
+read
+read -p “PLS enter”  v1
+
+2 case语句结构
+caes $v1 in
+1) 
+;;
+2)
+;;
+esac
+
+3 while语句结构
+while true
+do
+。。。。
+done
+
+
+[root@s55 ~]# cat exam01.sh
+#!/usr/bin/env bash
+# First Bash Scripts
+# Author:Anonymous
+# Date:20180805
+# 定一个测试的字符串变量MyStrings
+MyStrings="Cloud Computer Automatic Devs process framework is Ansible,Ansible is a Open Source Software"
+function print_menu
+{
+echo ${MyStrings}
+echo "==============Menu=============="
+echo "(1)显示该句子长度"
+echo "(2)  删除所有Ansible"
+echo "(3)  将Ansible替换为Jinkens"
+echo "(4)  将所有Ansible替换为Jinkens"
+echo "(Q)  退出"
+echo "================================"
+}
+
+print_long()
+{
+echo ${#MyStrings}
+}
+
+function del_ansible
+{
+echo ${MyStrings//Ansible/}
+}
+
+function change_ansible
+{
+echo ${MyStrings/Ansible/Jinkens} 
+}
+function change_all_ansible
+{
+echo ${MyStrings//Ansible/Jinkens} 
+}
+
+while true
+do
+print_menu
+read -p "Pls Choose 1|2|3|4|Q:" v1
+case $v1 in
+1)
+print_long
+;;
+2)
+del_ansible
+;;
+3)
+change_ansible
+;;
+4)
+change_all_ansible
+;;
+Q|q)
+exit
+;;
+esac
+done
+
+
+
+
+算术运算补充
+整数
+$(())
+数学运算 + - * / %
+++ --
+比较 == <> >= <= > <  返回布尔值
+逻辑判断 && ||
+? :
+expr 参数1 参数2 参数3
+$((表达式1运算符表达式2))
+[root@s55 ~]# echo $((100+200))
+300
+[root@s55 ~]# echo $((100-200))
+-100
+[root@s55 ~]# echo $((100*200))
+20000
+[root@s55 ~]# echo $((100/200))
+0
+[root@s55 ~]# echo $((1000/200))
+5
+[root@s55 ~]# echo $((1100/200))
+5
+[root@s55 ~]# echo $((1100%200))
+100
+
+还可以使用类似C语言的方式
+
+[root@s55 ~]# echo $((1==1))
+1
+[root@s55 ~]# echo $((1==2))
+0
+[root@s55 ~]# echo $((1>2))
+0
+[root@s55 ~]# echo $((10>2))
+1
+[root@s55 ~]# echo $((10>=2))
+1
+[root@s55 ~]# echo $((1&&1))
+1
+[root@s55 ~]# echo $((1&&0))
+0
+[root@s55 ~]# echo $((1||1))
+1
+[root@s55 ~]# echo $((1||0))
+1
+
+[root@s55 ~]# echo $((1?100:200))
+100
+[root@s55 ~]# echo $((0?100:200))
+200
+[root@s55 ~]# echo $((2>1?100:200))
+100
+[root@s55 ~]# echo $((2<1?100:200))
+200
+
+
+复习 命令替换
+command option parame
+返回结果
+
+在另一个命令中 利用该结果当参数
+command2  `command option parame` 
+
+[root@s55 ~]# echo `date`
+2019年 08月 05日 星期一 16:36:55 CST
+[root@s55 ~]# echo '2019年 08月 05日 星期一 16:36:55 CST'
+2019年 08月 05日 星期一 16:36:55 CST
+[root@s55 ~]# echo $(date)
+2019年 08月 05日 星期一 16:37:36 CST
+
+shell单引号 强
+        双引号 弱
+[root@s55 ~]# v1=a
+[root@s55 ~]# v2=x y
+bash: y: 未找到命令...
+[root@s55 ~]# v2="x y"
+[root@s55 ~]# v3='x y'
+[root@s55 ~]# echo $v2
+x y
+[root@s55 ~]# echo $v3
+x y
+[root@s55 ~]# v2="x $v1 y"
+[root@s55 ~]# v3='x $v1 y'
+[root@s55 ~]# echo $v2
+x a y
+[root@s55 ~]# echo $v3
+x $v1 y
+[root@s55 ~]# v2="x `date` y"
+[root@s55 ~]# v3='x `date` y'
+[root@s55 ~]# echo $v2
+x 2019年 08月 05日 星期一 16:45:34 CST y
+[root@s55 ~]# echo $v3
+x `date` y		
+
+
+补充 read 从键盘输入 获取变量值
+[root@s55 ~]# v1=100
+[root@s55 ~]# read v1
+200
+[root@s55 ~]# echo ${v1}
+200
+[root@s55 ~]# read v1 v2
+100
+[root@s55 ~]# echo ${v1}
+100
+[root@s55 ~]# echo ${v2}
+
+[root@s55 ~]# read v1 v2
+1000 2000
+[root@s55 ~]# echo ${v1}
+1000
+[root@s55 ~]# echo ${v2}
+2000
+[root@s55 ~]# read -s v1 隐藏
+[root@s55 ~]# echo $v1
+3000
+
+
+[root@s55 ~]# cat ./exam02.sh
+#!/usr/bin/env bash
+#
+#
+read -p "请你输入名字： " v_name
+read -p "请你输入年龄： " v_age
+read -p "请你输入性别： " v_sex
+
+echo "你刚才输入的以下信息"
+echo "你的名字是：${v_name}"
+echo "你的年龄是：${v_age}"
+echo "你的性别是：${v_sex}"
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

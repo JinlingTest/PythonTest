@@ -1,0 +1,461 @@
+流程控制语句 case
+语法：
+case ${VAR} in
+pattern)
+	command1;command2;....
+	;;
+pattern2)
+	command1;command2;....
+	;;
+pattern3)
+	command1;command2;....
+	;;
+*)	
+	command1
+	;;	
+esac	
+	
+test24.sh
+[root@s55 sh_practice]# cat test24.sh 
+#!/usr/bin/env bash
+#
+#
+
+read -p "PLS input A number: " V1
+case ${V1} in
+100)
+        echo "Is 100";echo "+++++++"
+        echo "------"
+        ;;
+200)
+        echo "Is 200";echo "+++++++"
+        echo "------"
+        ;;
+*)
+        echo " is not 100 OR 200"
+        ;;
+
+esac
+
+
+#!/usr/bin/bash
+#
+
+case $1 in
+start|"启动")
+        systemctl start nginx
+        ;;
+stop|"停止")
+        systemctl stop nginx
+        ;;
+status)
+        systemctl status nginx
+        ;;
+*)
+        echo "这个脚本是用来启动 关闭和查看nginx服务器的"
+        echo "你可以使用$0 start|stop|status来运行它"
+        ;;
+esac	
+	
+	
+	
+	
+	
+循环语句
+1.for循环 for..do..done
+for VAR in 循环列表
+do
+	command
+done
+
+#!/usr/bin/bash
+#
+#
+
+for V1 in dewd  ewre  erwqqae
+do
+echo "hello!   ${V1} "
+done
+
+
+for V1 in `cat /etc/hosts`
+do
+echo "hello!   ${V1} "
+done
+
+
+for V1 in `seq 100`
+do
+        #SUM=$SUM+V1
+        #SUM=$((SUM+V1))
+        SUM=`expr $SUM + $V1`
+done
+echo $SUM
+
+默认分隔符 空格
+#!/usr/bin/bash
+#
+#
+IFS=:
+for V1 in `cat testfile`
+do
+echo "hello!   ${V1} "
+done
+
+
+
+C语言风格 
+#!/usr/bin/bash
+#
+#
+
+for (( i=1;i<=10;i++ ))
+do
+echo " hello $i "
+done
+
+
+
+2.while循环	
+while 测试条件
+do
+	command
+done
+
+
+V1=1
+while [ ${V1} -le 5 ]
+do
+        echo $V1
+
+done
+
+kill -15
+Ctrl+C
+
+满足测试条件 退出循环
+V1=1
+while [ ${V1} -le 5 ]
+do
+        echo $V1
+        V1=$((V1+1))
+
+done
+
+#!/usr/bin/bash
+#
+#
+V1=1
+while true
+do
+        echo $V1
+        V1=$((V1+1))
+        if [ $V1 -eq 6 ];then
+        exit   #（跳出整个循环 执行循环体之后的语句）
+        fi
+done
+
+
+
+打印1-10之间的奇数
+#!/usr/bin/bash
+#
+#
+num=1
+while [ $num -lt 10 ]
+do
+if [ $((num%2)) -ne 0 ];then
+echo $num
+fi
+((num++))
+done
+
+
+#!/usr/bin/bash
+#
+#
+
+for i in `seq 9`
+do
+if [ $((i%2)) -ne 0 ];then
+echo $i
+fi
+done
+
+
+打印
+1*1=1
+2*2=4
+.....
+9*9=81
+
+#!/usr/bin/bash
+#
+#
+
+num=1
+while [ ${num} -le 9 ]
+do
+echo "${num}*${num}=$((num*num))"
+#num=$((num+1))
+((num++))
+done
+
+
+for num in `seq 9`
+do
+echo "$num*$num=$((num*num)) "
+done
+
+
+
+
+
+
+打印
+1*1=1 
+2*1=2 2*2=4
+3*1=3 3*2=6 3*3=9
+...
+8*1=8 8*2=16 8*3=24........8*8=64
+9*1=9 9*2=18 9*3=27 9*4=36 ........9*9=81 
+
+
+#!/usr/bin/bash
+#九九乘法表 领用for循环
+
+for x in `seq 9`
+do
+        for y in `seq ${x}` 
+        do 
+        echo -n "$x*$y=$((x*y))  "
+        done
+        echo ""
+done
+
+
+1 侦测 192.168.0.51-58 是否在线
+2 批量创建账号（6账号） 
+
+
+perl python php bash 
+
+
+1 侦测 192.168.0.51-58 是否在线
+
+
+ping 192.168.0.51
+ping -c1 192.168.0.51
+
+orgion::
+
+#!/usr/bin/bash
+#
+#
+
+for i in {1..8}
+do
+ping -c1 192.168.0.5${i} &> /dev/null
+if [ $? -eq 0 ];then
+echo "192.168.0.5${i} online"
+else
+echo "192.168.0.5${i} offline "
+fi
+done
+
+
+#!/usr/bin/bash
+#
+#
+for i in {1..8}
+do
+IPADD=192.168.0.5$i
+ping -c1 ${IPADD} &> /dev/null
+if [ $? -eq 0 ];then
+echo "${IPADD} online"
+else
+echo "${IPADD} offline "
+fi
+done
+
+2 提供了一个文件 写好了用户名
+批量创建账号（6账号）
+
+
+
+
+
+
+ueradd u1
+passwd u1
+# echo '1234'|passwd --stdin u1
+uuidgen|cut -d -  -f 5 |tee u1.txt| passwd --stdin u1
+字符串合并 v2="x y" v3="$V1 $V2"
+文本文件合并 cat f1 f2 f3 f4 。。。。。endfile
+按行合并 paste 命令
+
+#!/usr/bin/bash
+#
+#
+
+for USER in `cat /sh_practice/username`
+do
+id ${USER} &>/dev/null
+if [ $? -ne 0 ];then
+useradd ${USER} &>/dev/null
+fi
+uuidgen|cut -d - -f 5|tee ${USER}|passwd --stdin ${USER} &>/dev/null
+allfilename="$allfilename ${USER}"
+done
+cat ${allfilename} > pass
+paste -d "\t" username pass > user.dat
+if [ $? -eq 0 ];then
+echo "用户都已创建 用户名和密码在文件 user.dat"
+fi
+	
+
+3.在脚本后 写入用户名
+exam17.sh alice bob
+exam17.sh alice bob chralie david
+
+方法一
+利用$* 提取全部参数 作为for 循环体
+#!/usr/bin/bash
+>user.dat
+for USER in $*
+do
+id ${USER} &>/dev/null
+if [ $? -ne 0 ];then
+useradd ${USER} &>/dev/null
+fi
+uuidgen|cut -d - -f 5|tee ${USER}|passwd --stdin ${USER} &>/dev/null
+echo  "${USER} `cat ${USER}`">>user.dat
+done
+if [ $? -eq 0 ];then
+echo "用户都已创建 用户名和密码在文件 user.dat"
+fi
+
+
+方法2 使用shift 参数左移
+exam18.sh alice bob chralie david
+exam18.sh bob chralie david
+exam18.sh chralie david
+exam18.sh david
+exam18.sh 
+
+
+
+while [ $# -gt 0 ]
+do
+useradd $1
+shift
+done
+
+
+
+批量创建账号（6账号）
+
+#!/usr/bin/bash
+#
+#
+if [ $# -eq 0 ];then
+echo "这个脚本用来创建账号 用法 $0 用户名1 用户名2 ......"
+exit
+fi
+
+while [ $# -gt 0 ]
+do
+useradd $1
+shift
+done
+
+
+---------------------
+跳出脚本
+exit
+
+跳出循环
+break 跳出当前循环体
+continue 不执行当次循环作业的后续命令 直接进入下次循环
+
+#!/usr/bin/bash
+#
+#
+
+for num in {1..9}
+do
+if [ $((num%2)) -eq 0 ];then
+#continue
+#break
+exit 
+else
+echo ${num}
+fi
+done
+
+echo "end end end"
+
+
+
+函数
+#!/usr/bin/bash
+
+fun1()
+{
+echo "this is fun1"
+}
+
+fun2()
+{
+expr 1 + 2
+}
+
+function fun3
+{
+
+expr $1 + $2
+}
+
+fun4()
+{
+echo "this is fun4"
+return 100
+}
+
+fun5()
+{
+echo "this is fun5 Line 1"
+return 105
+echo "this is fun5 Line 2"
+}
+
+fun6()
+{
+echo "this is fun6 Line 1"
+exit 106
+echo "this is fun6 Line 2"
+}
+
+fun7()
+{
+echo "this is fun7 Line 1"
+}
+
+
+fun1
+fun2
+fun3 100 200
+fun4
+fun5
+fun6
+fun7
+
+
+
+	echo "# repo11" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/JinlingTest/repo11.git
+git push -u origin master
+	

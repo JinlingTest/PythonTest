@@ -1,0 +1,154 @@
+Structure Query Language
+Oracle oracle database Mysql Database(MariaDB) SQL Server
+
+docs.oracle.com
+1024x768 2GRAM		grep MemTotal /proc/meminfo    free 
+Oracle Linux 7 Redhat 7 Suse
+Disk space allocated to the /tmp directory least 1 GB   df -h /tmp
+SWAP  1.5RAM     grep SwapTotal /proc/meminfo   free
+OINSTALL Group    oinstall
+Groups and users  dba oper       oracle  
+Optimal Flexible Architecture    /u01/app/oracle
+The ASCII character
+superuser (root) privilege 
+NLS (National Language Support) 
+Environment Variables
+ORACLE_HOME, ORACLE_BASE, ORACLE_SID
+mask (umask) to 022 
+df -h /dev/shm 
+uname -m
+
+ Oracle Preinstallation RPM with ULN Support
+ yum -y install oracle-database-server-12cR2-preinstall
+ 
+字符界面 Lincense
+建普通用户......
+
+
+安装过程
+1。用root登录
+运行 yum install oracle-database-server-12cR2-preinstall
+ 
+2。上传 oracle数据库文件 linuxx64_12201_database.zip 至/tmp目录
+   设置oracle用户口令 passwd oracle
+ Optimal Flexible Architecture 解决OFA   
+    /u01/app/oracle
+mkdir -p /u01/app/oracle
+chown -R oracle.oinstall /u01
+chmod -R 755 /u01
+echo 'umask 022' >> /home/oracle/.bash_profile
+echo 'export TMP=/tmp' >> /home/oracle/.bash_profile
+echo 'export TMPDIR=/tmp' >> /home/oracle/.bash_profile
+echo 'export ORACLE_BASE=/u01/app/oracle' >> /home/oracle/.bash_profile
+echo 'export ORACLE_HOME=/u01/app/oracle/product/12.2.0/dbhome_1' >> /home/oracle/.bash_profile
+echo 'export ORACLE_SID=orcl' >> /home/oracle/.bash_profile
+echo 'export PATH=$ORACLE_HOME/bin:$PATH' >> /home/oracle/.bash_profile
+
+
+
+
+3. 在GUI中注销root 用oracle登录
+	到/tmp目录释放zip文件
+	cd /tmp
+    unzip linuxx64_12201_database.zip
+	cd /tmp/database
+	
+	su -
+	echo '192.168.0.122 db1.example.com'>>/etc/hosts
+	
+	oracle账号
+	cd /tmp/database
+	./runInstaller
+	忽略MOS信息
+	Install option （create and configure database））
+	选 Server Class	
+	选single instance database
+	选Advance install
+	选enterprise edition
+	观察oracle base目录 是不是 ORACLE_BASE 
+	观察oracle software location目录 是不是 ORACLE_HOME
+	Inventory Location  默认
+	Select type：General
+	 数据库名 观测  是不是 ORACLE_SID  !!!!!!去CHUcontainer dATABASE
+	 三个页面（memory内存40%  character字符集 UTF8 ！！！！install sample例子）
+	 数据库位置 /u01/app/oracle/oradata
+	 不选择  注册到EM Cloud
+	 不选择 Enable recovery 
+	 管理员密码 sys    system
+	 安全组 默认
+	 检测安装条件 通过
+	 开始install
+	 ..........
+	 ..........
+	 
+	 
+	 windows 
+	 Linux
+	
+	安装过程期间需要按提示运行脚本。
+	[root@db1 tmp]# /u01/app/oraInventory/orainstRoot.sh 
+Changing permissions of /u01/app/oraInventory.
+Adding read,write permissions for group.
+Removing read,write,execute permissions for world.
+
+Changing groupname of /u01/app/oraInventory to oinstall.
+The execution of the script is complete.
+[root@db1 tmp]# /u01/app/oracle/product/12.2.0/dbhome_1/root.sh 
+Performing root user operation.
+
+The following environment variables are set as:
+    ORACLE_OWNER= oracle
+    ORACLE_HOME=  /u01/app/oracle/product/12.2.0/dbhome_1
+
+Enter the full pathname of the local bin directory: [/usr/local/bin]: 
+   Copying dbhome to /usr/local/bin ...
+   Copying oraenv to /usr/local/bin ...
+   Copying coraenv to /usr/local/bin ...
+
+
+Creating /etc/oratab file...
+Entries will be added to the /etc/oratab file as needed by
+Database Configuration Assistant when a database is created
+Finished running generic part of root script.
+Now product-specific root actions will be performed.
+Do you want to setup Oracle Trace File Analyzer (TFA) now ? yes|[no] : 
+
+Oracle Trace File Analyzer (TFA - User Mode) is available at :
+    /u01/app/oracle/product/12.2.0/dbhome_1/suptools/tfa/release/tfa_home/bin/tfactl
+
+OR
+
+Oracle Trace File Analyzer (TFA - Daemon Mode) can be installed by running this script :
+    /u01/app/oracle/product/12.2.0/dbhome_1/suptools/tfa/release/tfa_home/install/roottfa.sh
+    另：安装尾声会提示fail 此为 Oracle DB问题 ID:2277154.1	
+	OL 7.3 INFO: Read: [FATAL] [DBT-06103] The port (5,500) is already in use.
+	       ID:2277154.1 ---------MOS
+	可完成其余安装部分
+
+    运行dbca创建数据库（步骤中去除 EM press组件即可成功）	
+		   
+	
+
+
+[oracle@db1 Desktop]$ lsntctl start
+[oracle@db1 Desktop]$ sqlplus / as sysdba
+SQL> startup
+SQL> alter user hr identified by hr account unlock;
+
+[oracle@db1 Desktop]$ /u01/app/oracle/product/12.2.0/dbhome_1/sqldeveloper/sqldeveloper.sh
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,207 @@
+cp 
+cp file1 file2
+cp file1 file2 file3 dir
+
+cp -r dir1 dir2
+cp -r dir1 dir2 dir3 dir4
+-r 递归
+
+mv
+mv file1 file2
+mv file1 file2 file3 dir
+
+mv dir1 dir2 (dir2不存在 就是将dir1改名为dir2)
+mv dir1 dir2 dir3 dir4
+
+mkdir dir1
+mkdir dir1/dir2
+mkdir dir1/dir2/dir3
+mkdir -p  dir1/dir2/dir3/dir4
+
+rm file1
+rm file1 file2 file3
+rm -f file1 file2 file3
+force强制
+rm -r dir1
+rm -r dir1 dir2
+rm -rf dir1 dir2
+
+相对路径
+绝对路径
+
+元字符 扩展技巧 提高文件的处理效率
+shell中通配 模式匹配
+*  0个以上字符串组成
+？ 1
+~  当前用户主目录
+~username 
+[abcxy.....]  任何一个
+
+[!abcxy.....] bush 任何一个
+[^abcxy.....] bush 任何一个
+space 
+punct
+命令替换 输出换命令 `` $()
+
+防止参数被扩展 忽略元字符含义 $字符美元符号  $元字符
+$元字符---变量替换
+v1=hello
+$v1
+''
+
+man手册
+1 command
+5 配置文件
+
+
+
+
+
+
+文本文件
+>file1  将stdout标准输出重定向到文件
+>>file1 将stdout标准输出重定向文件,附加到当前文件的后面
+2>file2 将stderr标准错误输出重定向到文件
+2>>file2 将stderr标准错误输出重定向到文件,附加到当前文件的后面
+&>file2 将stdout+stderr重定向到文件
+&>>file2 将stdout+stderr重定向到文件,附加到当前文件的后面
+
+
+shell命令
+cat head tail more less
+> 2> |
+wc mail tee tty
+ls cd cp mv rm mkdir touch man
+date cal
+
+gedit 
+vimtutor
+
+iI
+aA
+oO
+Normal Mode----Insert Mode
+dw
+d$
+
+
+d5d （剪切到寄存器）
+p
+
+y5y
+p
+
+cw
+ce
+
+c2e
+c3w
+
+G
+10G
+Ctrl-g
+
+
+s/enforcing/disabled
+s/enforcing/disabled/g
+8,11s/enforcing/disabled/g
+%s/enforcing/disabled/g
+%s/enforcing/disabled/gc
+
+
+650  ln fa /etc/faaaaa
+  651  ls -l fa faa faaa /tm/faaaa /etc/faaaaa
+  652  ls -l fa faa faaa /tmp/faaaa /etc/faaaaa
+  653  ls -l fa 
+  654  ls -li fa 
+  655  find / -inum 109964378 
+  656  find / -size  100M 
+  657  find / -size  100M  2>/dev/null
+  658  find / -size  +100M  2>/dev/null
+  659  find / -size  -100M  2>/dev/null
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

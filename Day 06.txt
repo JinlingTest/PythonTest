@@ -1,0 +1,90 @@
+1.节点网络优化
+2.存储服务器 软件  (目标 存储)
+   文件和iSCSI服务
+   iSCSI目标服务器
+   iSCSI存储提供程序  VHD
+   G:(iSCSI虚拟磁盘  仲裁文件  数据文件)
+   
+ 创建故障转移集群 (2节点 仲裁形式 节点+磁盘多数)
+ MyCluster.example.com
+ IP 192.168.0.200
+ 节点 win02/win03 
+ 
+ 文件 数据库 邮件 虚拟机...
+ 文件故障转移集群
+ 2节点安装 文件服务器
+ MyClusterFS
+ 
+文件
+打印
+集群
+
+DHCP 分配ip地址
+禁止VMware DHCP
+DC/member win01
+分配地址池 
+例如192.168.0.0/24
+例如192.168.0.100-150
+
+安装好DHCP服务器角色之后 提示“完成DHCP配置” （DHCP授权  域管理员）
+基本租用信息(ip mask ttl)
+网关 DNS
+
+
+
+ipconfig/all
+ipconfig/release
+ipconfig/renew
+
+
+DNS
+域名解析 主机名解析
+
+win01.example.com ----192.168.0.10
+example.com主  开启允许区域传输
+test.com主  开启允许区域传输
+
+
+win05.example.com ----192.168.0.50
+example.com辅助
+test.com辅助
+
+
+
+
+
+primary
+secondary
+Master
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+   

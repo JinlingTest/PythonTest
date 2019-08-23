@@ -1,0 +1,195 @@
+[root@mysqlc ~]# mysql_config_editor set --login-path=m20 --user=root --password --host=192.168.0.20 --port=3306
+Enter password: 
+[root@mysqlc ~]# mysql_config_editor set --login-path=s23 --user=root --password --host=192.168.0.23 --port=3306
+Enter password: 
+[root@mysqlc ~]# mysql_config_editor set --login-path=s22 --user=root --password --host=192.168.0.22 --port=3306
+Enter password: 
+[root@mysqlc ~]# mysql_config_editor set --login-path=cat90 --user=root --password --host=192.168.0.90 --port=8066
+
+/usr/local/mycat/conf/schema.xml
+                <writeHost host="hostM1" url="192.168.0.20:3306" user="root"
+                                   password="123">
+                        <!-- can have multi read hosts -->
+                        <readHost host="hostS2" url="192.168.0.23:3306" user="root" password="123" />
+                        <readHost host="hostS3" url="192.168.0.22:3306" user="root" password="123" />
+                </writeHost>
+				
+主库192.168.0.20
+---从库192.168.0.23
+---从库（中继库）192.168.0.22-----从库192.168.0.221				
+				
+				
+中继库
+log_bin=mysql_slave22 启用binlog
+log_slave_updates=1 将从主库中的日志重做记录也写到自己的binlog中
+重启
+mysql> grant replication slave on *.* to repl@'192.168.0.%' identified by '123456';
+
+导入world到从从库
+[root@server02 ~]# mysqldump -uroot -p1234 --databases world|mysql -uroot -p123 -h192.168.0.221
+
+S221
+添加一行在my.cnf
+server-id=4
+
+
+-----中继库slave 22
+查mysql> show master status;
+| File                 | Position 
+| mysql_slave22.000001 |      447
+
+------从从库slave221
+mysql> change master to master_host='192.168.0.22',master_user='repl',master_password='123456',master_log_file='mysql_slave22.000001',master_log_pos=447;
+mysql> start slave;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show slave status\G
+
+
+将中继相关表格改为黑洞引擎
+mysql> set sql_log_bin=off;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> alter table students engine=blackhole;
+Query OK, 1 row affected (0.01 sec)
+Records: 1  Duplicates: 0  Warnings: 0
+
+mysql> set sql_log_bin=on;
+Query OK, 0 rows affected (0.00 sec)
+
+
+
+
+------------MySQL Group Replication
+最新主从MGR
+
+Single-Primary Mode
+
+s41 42 43 Ver 5.7.27
+主机名
+echo '192.168.0.41 s41'>>/etc/hosts
+echo '192.168.0.42 s42'>>/etc/hosts
+echo '192.168.0.43 s43'>>/etc/hosts
+
+
+
+#Replication Framework
+server_id=41
+gtid_mode=ON
+enforce_gtid_consistency=ON
+binlog_checksum=NONE
+
+log_bin=binlog
+log_slave_updates=ON
+binlog_format=ROW
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+relay_log_recovery=1
+
+#Group Replication Settings
+transaction_write_set_extraction=XXHASH64
+plugin_load_add='group_replication.so'
+group_replication_group_name="589f740c-b425-11e9-a92a-000c29663c83"
+group_replication_start_on_boot=off
+group_replication_local_address= "s41:33061"
+group_replication_group_seeds= "s41:33061,s42:33061,s43:33061"
+group_replication_bootstrap_group=off
+
+
+
+first
+SET SQL_LOG_BIN=0;
+GRANT REPLICATION SLAVE ON *.* TO rpl_user@'192.168.0.%' IDENTIFIED BY '123456';
+SET SQL_LOG_BIN=1;
+CHANGE MASTER TO MASTER_USER='rpl_user', MASTER_PASSWORD='123456'
+ FOR CHANNEL 'group_replication_recovery';
+
+SET GLOBAL group_replication_bootstrap_group=ON
+mysql> START GROUP_REPLICATION;
+SET GLOBAL group_replication_bootstrap_group=OFF
+
+No2---。。。。
+SET SQL_LOG_BIN=0;
+GRANT REPLICATION SLAVE ON *.* TO rpl_user@'192.168.0.%' IDENTIFIED BY '123456';
+SET SQL_LOG_BIN=1;
+CHANGE MASTER TO MASTER_USER='rpl_user', MASTER_PASSWORD='123456'
+ FOR CHANNEL 'group_replication_recovery';
+
+mysql> START GROUP_REPLICATION;
+
+Single-Primary
+
+转
+Multi-Primary
+
+转换前看看
+mysql --login-path=s41 -e "show variables like 'super_read_only'"
+
+mysql --login-path=s41 -e "STOP GROUP_REPLICATION;"
+
+ALL Node STOP GROUP_REPLICATION;
+mysql --login-path=s41 -e "STOP GROUP_REPLICATION"
+mysql --login-path=s42 -e "STOP GROUP_REPLICATION"
+mysql --login-path=s43 -e "STOP GROUP_REPLICATION"
+
+
+echo 'group_replication_single_primary_mode=OFF'>>/etc/my.cnf
+echo 'group_replication_enforce_update_everywhere_checks=ON'>>/etc/my.cnf
+
+systemctl restart mysqld
+
+mysql_config_editor set --login-path=s41 --user=root --password -h192.168.0.41
+mysql_config_editor set --login-path=s42 --user=root --password -h192.168.0.42
+mysql_config_editor set --login-path=s43 --user=root --password -h192.168.0.43
+
+   91  mysql --login-path=s41 -e "show variables like 'super_read_only'"
+   92  mysql --login-path=s42 -e "show variables like 'super_read_only'"
+   93  mysql --login-path=s43 -e "show variables like 'super_read_only'"
+   94  mysql --login-path=s41 -e "STOP GROUP_REPLICATION"
+   95  mysql --login-path=s42 -e "STOP GROUP_REPLICATION"
+   96  mysql --login-path=s43 -e "STOP GROUP_REPLICATION"
+   每台添加
+   echo 'group_replication_single_primary_mode=OFF'>>/etc/my.cnf
+echo 'group_replication_enforce_update_everywhere_checks=ON'>>/etc/my.cnf
+
+   97  ssh-keygen -t rsa
+   98  ssh-copy-id 192.168.0.41
+   99  ssh-copy-id 192.168.0.42
+  100  ssh-copy-id 192.168.0.43
+  101  ssh --help
+  102  man ssh
+  103  ssh 192.168.0.41
+  104  ssh 192.168.0.41 "systemctl restart mysqld"
+  105  ssh 192.168.0.42 "systemctl restart mysqld"
+  106  ssh 192.168.0.43 "systemctl restart mysqld"
+  107  mysql --login-path=s41 -e "SET GLOBAL group_replication_bootstrap_group=ON"
+  108  mysql --login-path=s41 -e "START GROUP_REPLICATION"
+  109  mysql --login-path=s41 -e "SET GLOBAL group_replication_bootstrap_group=OFF"
+  110  mysql --login-path=s42 -e "START GROUP_REPLICATION"
+  111  mysql --login-path=s43 -e "START GROUP_REPLICATION"
+  112  mysql --login-path=s41 -e "show variables like 'super_read_only'"
+  113  mysql --login-path=s42 -e "show variables like 'super_read_only'"
+  114  mysql --login-path=s43 -e "show variables like 'super_read_only'"
+
+  116  mysql --login-path=s41 -e "insert into db1.test1 values(3,'Chralie')"
+  117  mysql --login-path=s42 -e "insert into db1.test1 values(4,'Devid')"
+  118  mysql --login-path=s43 -e "insert into db1.test1 values(5,'Edward')"
+
+sed -i '/^SELINUX=/s/enforcing/disabled/' /etc/sysconfig/selinux
+systemctl disable firewalld
+reboot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				

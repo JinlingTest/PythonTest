@@ -1,0 +1,265 @@
+集群
+1.负载均衡集群（1web--1000用户     大量web---海量） LBC
+2.高可用集群   主服务器---从服务器 HAC   Keepalived
+3.高性能计算集群  N服务器  HPC
+
+
+算法
+rr
+wrr
+D
+S
+
+负载均衡硬件 F5（P D）
+负载均衡软件 Linux 
+				LVS  四层（P D N(IP) T(TCP/UDP   port 80 443 8080)）
+				Nginx 7层 （P D N T S P A） 识别 
+				
+负载均衡----集群	
+LVS 
+内核中的 IPVS in Linux kernel
+用户使用 ipvsadm
+
+The LVS/NAT working principle and configuration instructions.
+The LVS/TUN working principle and configuration instructions.
+The LVS/DR working principle and configuration instructions.
+
+The LVS/DR 特点和注意事项
+1. 集群中所有节点在同一个广播域 （D和RS）
+2. 负载调度器D 负载最小？？？？
+3. 建议所有服务器为Linux   D  RS
+4. 不支持端口映射
+
+
+LAB------------------------
+
+ LVS DR 模式（--gatewaying   -g   gatewaying (direct routing) (default)）
+192.168.0.101 D
+192.168.0.102 RS1
+192.168.0.102 RS2
+网卡ens33
+
+RS1 RS2 安装apache 设置网页 （网页不一样是为了测试D负载调度器吧用户请求调度到不同的RS； 在生产环境中 网页必须一致性提供给客户   一般让多个Real Server使用后台共享存储）
+yum -y install httpd
+systemctl enable httpd
+systemctl start httpd
+echo "<H1> this is RS1</H1>" > /var/www/html/index.html
+curl localhost
+elinks http://localhost
+
+yum -y install httpd
+systemctl enable httpd
+systemctl start httpd
+echo "<H1> this is RS2</H1>" > /var/www/html/index.html
+curl localhost
+elinks http://localhost
+
+
+Director安装
+# yum install ipvsadm
+
+在D负载调度器和RS真实服务器上配置VIP 192.168.0.100
+
+======================Director====
+
+ 47  cp -a ifcfg-ens33{,:0}
+   48  vi ifcfg-ens33:0
+   
+	NAME=ens33:0
+	DEVICE=ens33:0
+	ONBOOT=yes
+	IPADDR=192.168.0.100
+	
+启动该接口 ifup ens33:0	
+
+=============RS1=============
+cd /etc/sysconfig/network-scripts
+   35  cp -a ifcfg-lo{,:0}
+   36  vi ifcfg-lo:0
+
+
+	DEVICE=lo:0
+	IPADDR=192.168.0.100
+	NETMASK=255.255.255.255
+	ONBOOT=yes
+	
+启动该接口 ifup lo:0
+
+
+===========RS2：===========
+
+cd /etc/sysconfig/network-scripts
+ cp -a ifcfg-lo{,:0}
+ vi ifcfg-lo:0
+
+	DEVICE=lo:0
+	IPADDR=192.168.0.100
+	NETMASK=255.255.255.255
+	ONBOOT=yes
+	
+启动该接口 ifup lo:0
+
+在两台RS上 添加路由
+route add -host 192.168.0.100 dev lo:0
+echo  "route add -host 192.168.0.100 dev lo:0" >> /etc/rc.local
+
+
+在两台RS上 关于ARP协议配置（忽略arp_ignore 发现arp_announce）
+echo "net.ipv4.conf.lo.arp_ignore = 1" >> /etc/sysctl.conf
+echo "net.ipv4.conf.lo.arp_announce = 2" >> /etc/sysctl.conf
+echo "net.ipv4.conf.default.arp_ignore = 1" >> /etc/sysctl.conf
+echo "net.ipv4.conf.default.arp_announce = 2" >> /etc/sysctl.conf
+echo "net.ipv4.conf.all.arp_ignore = 1" >> /etc/sysctl.conf
+echo "net.ipv4.conf.all.arp_announce = 2" >> /etc/sysctl.conf
+# sysctl -p  应用
+
+查验
+[root@s102 proc]# cat /proc/sys/net/ipv4/conf/lo/arp_announce       
+2
+[root@s102 proc]# cat /proc/sys/net/ipv4/conf/lo/arp_ignore 
+1
+
+
+负载调度器Director和真实服务器RealServer都关闭 NetworkManager
+# systemctl disable NetworkManager
+# systemctl stop NetworkManager
+
+
+ipvsadm 
+
+vip 192.168.0.100 
+Director 192.168.0.101
+RS       192.168.0.102
+	     192.168.0.103
+
+ipvsadm --add-service --tcp-service 192.168.0.100:80 --scheduler rr
+
+
+ipvsadm --add-service --tcp-service 192.168.0.100:80 --scheduler rr
+ipvsadm --add-server  --tcp-service 192.168.0.100:80 --real-server 192.168.0.102:80 -g 
+ipvsadm --add-server  --tcp-service 192.168.0.100:80 --real-server 192.168.0.103:80 -g 
+或
+ipvsadm -A -t 192.168.0.100:80 -s rr
+ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.102:80 -g
+ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.103:80 -g
+
+rr为轮询算法
+-g 为此次实验使用的DR模式
+
+小规模测试用浏览器http://192.168.0.100
+批量负载测试用ab -c 1000 -n 5000 http://192.168.0.100/index.html
+ab软件为apache中提供
+
+查看
+[root@s101 ~]#  ipvsadm -Ln --stats
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port               Conns   InPkts  OutPkts  InBytes OutBytes
+  -> RemoteAddress:Port
+TCP  192.168.0.100:80                 6555    34218        0  2603672        0
+  -> 192.168.0.102:80                 3277    17140        0  1306431        0
+  -> 192.168.0.103:80                 3278    17078        0  1297241        0
+ 
+总连接 6555  每台RS分了 一半3277  3278
+rr-round robin
+wrr-权重RR （性能好的机器 W高 得到更多的访问请求）
+lc 最少连接数
+wlc 权重最少连接数
+lblc|lblcr|dh|sh|sed|nq
+
+HA评价
+99%      一年可停机87hour
+99.9%		一年可停机8
+99.99%	一年可停机50min
+99.999%   一年可停机5min
+
+
+LVS并没有RS服务检测机制 
+
+解决
+1.自己写脚本
+ 1检测RS HTTP
+ 取出所有RS ipvsadm -Ln |awk 'NR>4{print $2}'|awk 'BEGIN{FS=":"}{print $1}'
+ 
+for i in `ipvsadm -Ln |awk 'NR>4{print $2}'|awk 'BEGIN{FS=":"}{print $1}'`
+do
+curl http://${i} &> /dev/null
+	if [ $? -eq 0 ];then
+		echo "${i} HTTPD Sevice is OK"
+	else
+		echo "${i} HTTPD Sevice is Fail"
+	fi	
+done
+ 
+ curl http://192.168.0.102
+ curl http://192.168.0.103
+ 
+ 
+ 
+ 2将不能提供服务RS从LVS负载均衡集群中提出
+   if RS提供服务 加回
+   
+  ipvsadm -d -t 192.168.0.100:80 -r 192.168.0.103:80
+  ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.103:80 -g
+
+
+   
+[root@s101 ~]# cat rslist.txt 
+192.168.0.102
+192.168.0.103
+[root@s101 ~]# cat t1.sh 
+#!/usr/bin/bash
+#
+#
+while true
+do
+#通过awk从命令ipvsadm中提取Director的地址
+DIPADDR=`/usr/sbin/ipvsadm -Ln|awk 'NR==4{print $2}'|awk 'BEGIN{FS=":"}{print $1}'`
+
+#事先将集群中真实服务的列表写在文件rslist.txt中
+for i in `cat rslist.txt`
+do
+curl http://${i} &> /dev/null
+        if [ $? -ne 0 ];then
+           /usr/sbin/ipvsadm -d -t ${DIPADDR}:80 -r ${i}:80 &> /dev/null 
+        else
+           /usr/sbin/ipvsadm -a -t ${DIPADDR}:80 -r ${i}:80 -g &> /dev/null
+        fi
+done
+#该脚本每五秒运行一次检测
+sleep 5
+done
+
+
+ipvsadm -A -t 192.168.0.100:80 -s rr
+ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.102:80 -g
+ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.103:80 -g
+ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.104:80 -g
+ipvsadm配置保存
+方法1 加入开机自启动脚本
+echo "ipvsadm -A -t 192.168.0.100:80 -s rr" >> /etc/rc.local
+echo "ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.102:80 -g" >> /etc/rc.local
+echo "ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.103:80 -g" >> /etc/rc.local
+echo "ipvsadm -a -t 192.168.0.100:80 -r 192.168.0.104:80 -g" >> /etc/rc.local
+chmod +x /etc/rc.d/rc.local
+
+
+！！！！
+centOS 7 已经改动 原始开机自启动脚本权限
+/etc/rc.local 仅是 链接文件
+/etc/rc.d/rc.local
+
+ll /etc/rc.d/rc.local 
+-rw-r--r--. 1 root root 672 8月  13 17:49 /etc/rc.d/rc.local
+
+方法2
+ipvsadm-save > /root/ipvs.conf
+ipvsadm-restore < /root/ipvs.conf
+
+
+
+
+
+
+
+
+			

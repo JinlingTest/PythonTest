@@ -1,0 +1,102 @@
+访问命令行
+
+john117 1
+root  oracle
+$
+#
+
+shell程序
+bash
+单条 脚本 ----自动化
+
+虚拟控制台
+CentOS 7 图形界面控制台1 23456
+
+shell命令
+三个基本组成部分
+command -option args;command -option args;command -option args
+[] 可选 
+...系列性的若干项目
+|  只能选其一
+<> 放入变量
+
+date
+date +%x%X
+
+passwd 普通用户使用 更改用户自己密码
+file 
+cat 
+head
+tail
+wc
+
+TAB补全
+
+命令的历史
+
+
+文件系统结构
+/ 根目录
+/usr  应用软件  软件库文件
+/usr/bin   用户命令
+/usr/sbin  管理命令
+/usr/local 自定义软件
+/usr/local/src 
+
+/etc 配置信息文件存放的目录
+
+/root 管理员的主目录
+/home 普通用户的主目录
+
+/var  数据库 缓存 日志 打印后台文档 网站 临时
+/var/tmp  30
+/tmp    10 
+/dev 设备文件 供系统访问硬件
+
+
+  
+文件
+touch file1
+.    当前目录
+..   父目录
+
+cp
+mv
+
+工作目录
+  pwd
+  cd
+
+工作目录
+  pwd
+  cd
+  
+  
+
+  
+  
+  
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

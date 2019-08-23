@@ -1,0 +1,302 @@
+MYSQL
+5.5/5.6
+mysql.com oracle.com
+5.8(8.0)
+MySQL Enterprise Edition (commercial)
+MySQL Community Edition (GPL)
+https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+rpm -ivh mysql80-community-release-el7-3.noarch.rpm
+https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+rpm -ivh https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+安装 5.7.27
+yum-config-manager --disable mysql80-community
+yum-config-manager --enable mysql57-community
+yum repolist all | grep mysql
+yum install mysql-community-server
+
+mysql -V
+mysqld -V
+
+systemctl start mysqld
+mysql -uroot -p`awk '/password/{print $NF}' /var/log/mysqld.log`
+mysql -uroot -p
+grep password /var/log/mysqld.log
+# mysql -uroot -pOFfwetrFb9#_
+mysql> set password=PASSWORD('123#$%ABc');
+mysql> set global validate_password_policy=0;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set global validate_password_length=0;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set password=PASSWORD('1234');
+
+数值类型
+decimal(7,2)
+bigint int整数 mediumint smallint tinyint0-255 -128-127
+float  double
+日期 
+date
+time
+datetime
+字符
+char 255Byte
+varchar 65535
+longtext 4,000,000,000
+
+select now();
+select curdate();
+select curtime
+select database();
+select user();
+select version();
+
+show databases;
+show variables;
+show global variables;
+show engines;
+
+show variables like 'validate_password_policy';
+show variables like 'validate_password%';
+show global variables like 'validate_password%';
+
+show status;
+show status like 'Thread%';
+
+help
+help select
+help create table
+
+   39  mysql -uroot -p1234 db1<myworld.sql
+   40  mysqldump -uroot -p1234 -B world>yourworld.sql
+   41  diff myworld.sql yourworld.sql 
+   42  history 
+   43  mysql -uroot -p1234 <yourworld.sql
+   44  diff world.sql yourworld.sql
+[root@server00 ~]# mysql -uroot -p1234 <myworld.sql
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1046 (3D000) at line 22: No database selected
+[root@server00 ~]# mysql -uroot -p1234 db2 <myworld.sql
+
+mysql> select code,name,region from country into outfile '/tmp/country.dat';
+ERROR 1290 (HY000): The MySQL server is running with the --secure-file-priv option so it cannot execute this statement
+
+mysql> select code,name,region from country into outfile '/tmp/country.dat';
+Query OK, 239 rows affected (0.02 sec)
+
+服务器的配置文件 /etc/my.cnf
+secure-file-priv=/tmp
+systemctl restart mysqld 
+
+client
+– mysql：发出查询以及查看结果。
+– mysqladmin：管理服务器。
+– mysqlcheck：检查数据库表的完整性。
+– mysqldump： 创建逻辑备份。
+– mysqlimport：导入文本数据文件。
+– mysqlshow：显示数据库、表和列信息。
+– mysqlslap：模仿客户机负载。
+
+非客户机程序
+使用非客户机程序 直接访问文件 
+– innochecksum：脱机检查InnoDB 表空间文件。
+– mysqlaccess：检查访问特权。
+– mysqldumpslow：汇总慢速查询日志文件。
+– mysqlbinlog：显示二进制日志文件。
+某些应用程序在运行之前必须满足以下要求：
+– 关闭服务器。
+– 备份当前表。
+
+• 是称为mysqld 的数据库服务器程序
+• 与“主机”不相同
+• 是一个单一进程，且为多线程
+• 管理对磁盘上和内存中数据库的访问
+• 支持并发客户机连接
+• 支持多种存储引擎
+• 支持事务表和非事务表
+• 使用以下形式的内存：
+– 缓存 cache
+– 缓冲 buffer
+
+1连接层
+• 通信协议
+• 线程
+• 验证
+TCP/IP  本地、远  所有
+UNIX 套接字文 仅本 仅UNIX
+
+
+2.SQL 层
+• 解析器• 查询执行
+• 授权• 查询高速缓存
+• 优化器• 查询日志记录
+
+3.存储层
+内存 • MEMORY
+磁盘 • InnoDB • MyISAM
+网络 • NDB
+
+依赖于存储引擎的功能
+• 存储介质
+• 事务功能
+• 锁定
+• 备份和恢复
+• 优化
+• 特殊功能
+– 全文搜索
+– 引用完整性
+– 空间数据处理
+
+MySQL 如何使用磁盘空间
+ grep datadir /etc/my.cnf 
+ datadir=/var/lib/mysql
+ 
+InnoDB 日志文件 ib_logfile0 ib_logfile1
+InnoDB 系统表空间 ibdata1
+
+数据库 每个数据库一个目录()
+
+MySQL 如何使用内存
+全局
+– 分配一次
+– 由服务器进程及其线程共享
+会话
+– 针对每个线程分配
+– 动态分配和取消分配
+– 用于处理查询结果
+– 每个会话的缓冲区大小
+
+服务器/共享：
+查询高速缓存
+线程高速缓存 
+
+存储引擎/共享：
+日至缓冲区
+缓冲区
+连接/会话
+排序、读取、临时表
+show variables like '%cache%';
+show variables like '%buffer%';
+
+mysql> show PLUGINS;
+
+
+[root@server01 ~]# ls /usr/bin/mysql*
+/usr/bin/mysql                /usr/bin/mysqld_pre_systemd  /usr/bin/mysql_secure_installation
+/usr/bin/mysqladmin           /usr/bin/mysqldump           /usr/bin/mysqlshow
+/usr/bin/mysqlbinlog          /usr/bin/mysqldumpslow       /usr/bin/mysqlslap
+/usr/bin/mysqlcheck           /usr/bin/mysqlimport         /usr/bin/mysql_ssl_rsa_setup
+/usr/bin/mysql_config         /usr/bin/mysql_install_db    /usr/bin/mysql_tzinfo_to_sql
+/usr/bin/mysql_config-64      /usr/bin/mysql_plugin        /usr/bin/mysql_upgrade
+/usr/bin/mysql_config_editor  /usr/bin/mysqlpump
+[root@server01 ~]# ls /usr/sbin/mysql*
+/usr/sbin/mysqld  /usr/sbin/mysqld-debug
+[root@server01 ~]# ls /var/log/mysqld.log 
+/var/log/mysqld.log
+
+服务器脚本
+/usr/lib/systemd/system/mysqld.service
+
+systemctl stop mysqld
+mysqladmin 关机选项
+
+mysql_secure_installation （安装后 运行一次 解决安全漏洞 root anonymous root remote test database）
+
+
+服务器系统变量
+• MySQL 服务器维护了许多服务器系统变量，这些变量
+可指示服务器的配置情况。
+• 每个系统变量都有默认值。
+• 通过执行以下任一操作，可以在服务器启动时设置变量：
+– 在命令行上使用选项。
+– 使用选项文件。
+• 可以在表达式中引用系统变量值。
+• 可以查看服务器使用的系统变量值。
+
+
+spuer权限 
+全局 set GLOBAL variable=values;
+set global validate_password_length=1;
+common user
+会话 set session variable=values
+
+mysql> SHOW VARIABLES LIKE 'bulk%';
+mysql> SHOW global VARIABLES LIKE 'bulk%';
+mysql> SET bulk_insert_buffer_size=4000000;
+mysql> SET global bulk_insert_buffer_size=5000000;
+
+
+/etc/my.cnf
+[mysqld]
+bulk_insert_buffer_size=7000000
+
+
+log
+show variables like '%log%' ;
+MySQL 用不同的日志文件来记录服务器活动：
+– 错误 (服务器日志 log-error=/var/log/mysqld.log)
+– 常规查询 
+general_log=1
+general_log_file=/var/lib/mysql/s00_general.log
+– 慢速查询
+slow_query_log            | ON                               |
+slow_query_log_file       | /var/lib/mysql/server00-slow.log 
+long_query_time 
+– 二进制
+If you specify the --log-bin option without also specifying a --server-id, the server is not allowed to start. (Bug #11763963, Bug #56739)
+server-id=1
+log_bin=/var/lib/mysql/mysql-bin
+
+ log_bin                         | ON                             |
+| log_bin_basename                | /var/lib/mysql/mysql-bin       |
+| log_bin_index                   | /var/lib/mysql/mysql-bin.index |
+
+– 企业审计
+
+
+
+
+
+mysql> status;
+--------------
+mysql  Ver 14.14 Distrib 5.7.27, for Linux (x86_64) using  EditLine wrapper
+
+Connection id:          5
+Current database:
+Current user:           zabbix@localhost
+SSL:                    Not in use
+Current pager:          stdout
+Using outfile:          ''
+Using delimiter:        ;
+Server version:         5.7.27 MySQL Community Server (GPL)
+Protocol version:       10
+Connection:             Localhost via UNIX socket
+Server characterset:    latin1
+Db     characterset:    latin1
+Client characterset:    utf8
+Conn.  characterset:    utf8
+UNIX socket:            /var/lib/mysql/mysql.sock
+Uptime:                 23 min 57 sec
+
+Threads: 1  Questions: 12259  Slow queries: 0  Opens: 796  Flush tables: 1  Open tables: 167  Queries per second avg: 8.530
+--------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

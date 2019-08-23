@@ -1,0 +1,195 @@
+使用MySQL Cluster
+第一个SQL节点 
+# grep password /var/log/mysqld.log 
+2019-07-30T09:44:40.465596Z 1 [Note] A temporary password is generated for root@localhost: LNkueQaz:9h?
+[root@s01 ~]# echo 'validate_password=0'>> /etc/my.cnf
+[root@s01 ~]# systemctl restart mysqld
+[root@s01 ~]# mysql -uroot -pLNkueQaz:9h? 
+
+mysql> set password=PASSWORD('123');
+
+
+[root@s01 ~]# mysql -uroot -p123
+mysql> create database testdb;
+mysql> use testdb;
+Database changed
+mysql> create table students(id int,stu_name char(10)) engine=ndb;
+Query OK, 0 rows affected (0.24 sec)
+
+mysql> insert into students values(1,'alice'),(2,'bob'),(3,'Charlie');
+第二个SQL节点
+[root@s02 ~]# grep password /var/log/mysqld.log 
+2019-07-30T09:45:37.395763Z 1 [Note] A temporary password is generated for root@localhost: unIS9VGgGp<e
+[root@s02 ~]# echo 'validate_password=0'>> /etc/my.cnf
+[root@s02 ~]# systemctl restart mysqld
+[root@s02 ~]# mysql -uroot -p'unIS9VGgGp<e'
+mysql> set password=PASSWORD('123');
+[root@s02 ~]# mysql -uroot -p123 -e "select * from testdb.students"
+
+
+关闭
+ndb_mgm> shutdown
+Node 2: Cluster shutdown initiated
+Node 3: Cluster shutdown initiated
+Node 3: Node shutdown completed.
+Node 2: Node shutdown completed.
+3 NDB Cluster node(s) have shutdown.
+Disconnecting to allow management server to shutdown.
+
+
+再次启动
+[root@m01 ~]# ndb_mgmd --ndb_nodeid=1 --initial -f /usr/mysql-cluster/cluste
+r.cnf
+
+[root@d01 ~]# ndbd
+[root@d02 ~]# ndbd
+
+
+[root@s01 ~]# systemctl restart mysqld
+[root@s02 ~]# systemctl restart mysqld
+
+
+
+ 25  mysql -uroot -p123 -e "grant all privileges on *.* to root@'%' identified by '123'"
+   26  mysqladmin -uroot -p123 -h192.168.0.51 shutdown
+
+
+-----------MyCAT
+程序代码 
+DML------Master
+SELECT----Slave
+
+mycat ---apache
+mycat.io
+
+# wget https://github.com/MyCATApache/Mycat-download/raw/master/1.6-RELEASE/Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz
+
+# java -version
+# tar xf Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz  -C /usr/local/
+# echo "export PATH=/usr/local/mycat/bin:$PATH" >> /root/.bash_profile 
+# mycat start
+# mycat stop
+
+主从库建立 可以远程登录的root账号
+mysql> grant all privileges on *.* to root@'192.168.0.%' identified by 123;
+
+mysql> grant all privileges on *.* to root@'192.168.0.%' identified by 123;
+
+在mycat配置
+[root@server90 ~]# cp /usr/local/mycat/conf/server.xml{,.bak} 
+[root@server90 ~]# cp /usr/local/mycat/conf/schema.xml{,.bak} 
+
+针对world数据库 读写分离
+vi /usr/local/mycat/conf/server.xml
+ 看
+<user name="root">  mycat 管理员 
+                <property name="password">123456</property> 密码
+                <property name="schemas">TESTDB</property>  逻辑库
+				
+				
+vi /usr/local/mycat/conf/schema.xml	
+
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+
+        <schema name="TESTDB" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn1">
+        </schema>
+        <dataNode name="dn1" dataHost="localhost1" database="world" />
+        <dataHost name="localhost1" maxCon="1000" minCon="10" balance="1"
+                          writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+                <heartbeat>select user()</heartbeat>
+                <writeHost host="hostM1" url="192.168.0.20:3306" user="root"
+                                   password="123">
+                        <readHost host="hostS2" url="192.168.0.23:3306" user="root" password="123" />
+                </writeHost>
+        </dataHost>
+</mycat:schema>
+
+mycat start
+
+
+[root@mysqlc ~]# mysql -uroot -p123456 -h192.168.0.90 -P8066
+
+
+/usr/local/mycat/conf/log4j2.xml
+ <asyncRoot level="debug" includeLocation="true">
+[root@server90 ~]# mycat restart
+
+tail -f /usr/local/mycat/logs/mycat.log 
+fromSlaveDB=true  从从库查询
+fromSlaveDB=false 从主库更改数据
+读写分离
+
+
+
+---LAB 添加一个SLAVE
+1虚机192.168.0.22（hostname firewalld selinux   网卡ens33 uuid）
+2.安装mysql day 26
+3.改 my.cnf
+validate_password=0
+4.建一个远程root
+ mysql> grant all privileges on *.* to root@'192.168.0.%' identified by '123';
+5.从库
+6.改 my.cnf
+server-id=3 
+7.将主库数据库复制过来
+# mysqldump --login-path=r --databases world db1 db2 |mysql -uroot -p123 -h192.168.0.22
+8.在新从库 看看
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| db1                |
+| db2                |
+| mysql              |
+| performance_schema |
+| sys                |
+| world              |
++--------------------+
+7 rows in set (0.01 sec)
+
+9.做slave
+9.1 在主库是看看
+mysql> show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000015 |   268598 | world        | mysql            |                   |
++------------------+----------+--------------+------------------+-------------------+
+9.2从库
+mysql> change master to master_host='192.168.0.20',master_user='repl',master_password='123456',master_log_file='mysql-bin.000015',master_log_pos=268598;
+mysql> start slave;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show slave status\G
+
+
+OK.....
+
+
+
+虚机
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

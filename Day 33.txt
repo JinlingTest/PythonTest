@@ -1,0 +1,419 @@
+条件测试语句
+实现流程控制 if
+1.
+if 条件; then
+命令
+fi
+
+[root@s55 sh_practice]# cat exam03.sh 
+#!/usr/bin/env bash
+# if statement I
+
+if true; then
+echo "this is true"
+fi
+
+[root@s55 sh_practice]# cat exam04.sh 
+#!/usr/bin/env bash
+# if statement I
+
+if ls /etc; then
+echo " etc directory is OK"
+fi
+
+
+双分支
+if 条件表达式;then
+command 1
+else
+command2
+fi
+
+[root@s55 sh_practice]# cat exam04.sh
+#!/usr/bin/env bash
+# if statement I
+
+if ls /etca &> /dev/null; then
+echo " the  directory is OK"
+else
+echo " the  directory is error"
+fi
+
+
+多分支 (建议case)
+if 条件表达式1; then
+command1
+elif 条件表达式2;then
+command2
+elif 条件表达式3;then
+command3
+......
+else
+command
+fi
+
+条件测试
+test或[
+test - check file types and compare values
+INTEGER 测试数值 整数
+
+代码片段
+while true
+do
+print_menu
+read -p "Pls Choose 1|2|3|4|5:" v1
+if test ${v1} -eq 1;then
+print_long
+elif test ${v1} -eq 2;then
+del_ansible
+elif test ${v1} -eq 3;then
+change_ansible
+elif test ${v1} -eq 4;then
+change_all_ansible
+else test ${v1} -eq 5
+exit
+fi
+
+
+while true
+do
+print_menu
+read -p "Pls Choose 1|2|3|4|5:" v1
+if [ ${v1} -eq 1 ];then
+print_long
+elif [ ${v1} -eq 2 ];then
+del_ansible
+elif [ ${v1} -eq 3 ];then
+change_ansible
+elif [ ${v1} -eq 4 ];then
+change_all_ansible
+else [ ${v1} -eq 5 ]
+exit
+fi                                                                 
+test  [ 测试命令
+语法：
+test [ 测试条件
+1.数值比较 
+-eq  比较两边数值是否相等
+-ne  不等
+-gt  大于
+-lt  小于
+-ge  大于等于 
+-le  小于等于 
+
+#!/usr/bin/env bash
+#
+#
+read -p "Please input a Number: " V1
+if [ ${V1} -eq 100 ];then
+echo "你刚才输入的是100"
+else
+echo "你刚才输入的不是100"
+fi
+
+
+
+2.字符串比较
+==
+!=
+-z  零
+-n  NULL  不为NULL是返回True   为NULL 返回false
+>  使用时需用转义符 \>
+<                    \< 
+
+[root@s55 sh_practice]# vi test01.sh
+
+#!/usr/bin/env bash
+#
+#
+#read -p "Please input a Number: " V1
+read -p "Please input you name: " V1
+
+if [ -z "${V1}" ];then
+echo "你没有输入任何信息"
+else
+echo "你输入的是 ${V1}"
+fi
+
+------
+#!/usr/bin/env bash
+#
+#
+#read -p "Please input a Number: " V1
+while true;
+do
+read -p "Please input you name: " V1
+if [ -z "${V1}" ];then
+echo "你没有输入任何信息,请输入： "
+else
+echo "你输入的是 ${V1}";
+exit
+fi
+done
+
+
+'A' 'a'
+A的ASCII码是65,a的ASCII码是97
+
+
+[root@s55 sh_practice]# vi test03.sh
+
+#!/usr/bin/env bash
+#
+#
+
+read -p "请你输入两个字母 用空格分开: "  va  vb
+if [ ${va} \> ${vb} ];then
+echo "${va} 大于 ${vb}"
+else
+echo "${va} 小于 ${vb}"
+fi
+
+
+
+
+
+LAB 做一个脚本：清理日志
+(/var/log/message)
+(保留最近1000行)
+
+
+if [ ${USER} != "root"  ]; then
+echo "该脚本只有root才可以执行";
+exit
+fi
+
+
+function clear_log
+{
+tail -1000 /var/log/message > /var/log/message1000
+> /var/log/message
+cat /var/log/message1000 > /var/log/message
+}
+
+clear_log
+
+
+
+文件比较
+-f 文件存在 返回真
+-d 目录存在 返回真 
+-c 字符设备
+-b 快设备
+-r 读
+-w 写
+-x 执行 
+-s 不为空返回真
+[root@s55 sh_practice]# if [ -f /etc/my.cnf ];then echo "在";else echo "不在";fi
+在
+[root@s55 sh_practice]# mv /etc/my.cnf{,.bak}
+[root@s55 sh_practice]# if [ -f /etc/my.cnf ];then echo "在";else echo "不在";fi
+不在
+[root@s55 sh_practice]# mv /etc/my.cnf{.bak,}
+[root@s55 sh_practice]# if [ -f /etc/my.cnf ];then echo "在";else echo "不在";fi
+在
+[root@s55 sh_practice]# mkdir /xyz
+[root@s55 sh_practice]# if [ -d /xyz ];then echo "在";else echo "不在";fi
+在
+[root@s55 sh_practice]# rmdir /xyz
+[root@s55 sh_practice]# if [ -d /xyz ];then echo "在";else echo "不在";fi
+不在
+[root@s55 sh_practice]# if [ -x /sh_practice/exam06.sh ];then echo "可";else echo "不可";fi
+可
+[root@s55 sh_practice]# if [ -x /sh_practice/exam06.sh ];then echo "可";else echo "不可";fi
+不可
+
+
+[root@s55 sh_practice]# mkdir /aaa
+[root@s55 sh_practice]# touch /aaa/f1
+[root@s55 sh_practice]# touch /aaa/f2
+[root@s55 sh_practice]# echo 'a' >/aaa/f2
+[root@s55 sh_practice]# if [ -s /aaa/f2 ];then echo "有东西";else echo "空文件";fi
+有东西
+[root@s55 sh_practice]# if [ -s /aaa/f1 ];then echo "有东西";else echo "空文件";fi
+空文件
+
+-e
+
+f1 -nt f2  前者新 返回真
+f1 -ot f2  前者旧 返回真 
+[root@s55 sh_practice]# if [ exam02.sh -nt exam03.sh ];then echo "前者新";else echo "前者旧";fi
+前者旧
+[root@s55 sh_practice]# if [ exam02.sh -ot exam03.sh ];then echo "前者old";else echo "前者new";fi
+前者old
+
+逻辑判断 && ||
+
+脚本 你输入学生年龄
+年龄在7-12 该生可以入学
+否则不可以 
+
+[root@s55 sh_practice]# vi exam08.sh
+
+#!/usr/bin/bash
+#
+#
+
+read -p "请你输入该生的年龄：" num
+if [ ${num} -ge 7 ] && [ ${num} -le 12 ];then
+echo "该生可以入学"
+else
+echo "该生不可以入学"
+fi
+
+read -p "请你输入该生的年龄：" num
+if [ ${num} -ge 7 -a ${num} -le 12 ];then
+echo "该生可以入学"
+else
+echo "该生不可以入学"
+fi
+
+
+read -p "请你输入该生的年龄：" num
+if [ ${num} -le 7 ] || [ ${num} -ge 12 ];then
+echo "该生不可以入学"
+else
+echo "该生可以入学" 
+fi
+
+
+read -p "请你输入该生的年龄：" num
+if [ ${num} -le 7 -o ${num} -ge 12 ];then
+echo "该生不可以入学"
+else
+echo "该生可以入学"
+fi
+
+比较 【】  【【】】区别
+read -p "请你输入该生的年龄：" num
+if [[ ${num} -le 7 || ${num} -ge 12 ]];then
+echo "该生不可以入学"
+else
+echo "该生可以入学"
+fi
+
+【【】】比单【】
+正则 
+* 0-n
+? only 1
+[abcd] 列表
+[acf]
+[a-g]
+[!]
+{alice,bob}
+
+#!/usr/bin/bash
+#
+#
+
+
+
+read -p "请你输入名字： " name
+if [[ ${name} == [abcd]* ]];then
+echo "录取"
+else
+echo "不录取"
+fi
+
+[root@s55 sh_practice]# bash exam09.sh 
+请你输入名字： alice
+录取
+[root@s55 sh_practice]# bash exam09.sh 
+请你输入名字： bob
+录取
+[root@s55 sh_practice]# bash exam09.sh 
+请你输入名字： chralie
+录取
+[root@s55 sh_practice]# bash exam09.sh 
+请你输入名字： david
+录取
+[root@s55 sh_practice]# bash exam09.sh 
+请你输入名字： edward
+不录取
+
+
+姓名 abcd
+
+
+#!/usr/bin/bash
+#
+#
+
+
+read -p "请你输入名字： " name
+if [[ "${name}" == bob || ${name} == alice ]];then
+echo "录取"
+else
+echo "不录取"
+fi
+~
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+linus:the stupid content tracker
+git
+
+[root@s55 sh_practice]# git --version
+git version 1.8.3.1
+[root@s55 sh_practice]# git config --global user.name "Jin"
+[root@s55 sh_practice]# git config --global user.email "70491992@qq.com"
+[root@s55 sh_practice]# git config --list
+user.name=Jin
+user.email=70491992@qq.com
+[root@s55 sh_practice]# git config --global alias.st status
+[root@s55 sh_practice]# git config --global alias.co checkout
+[root@s55 sh_practice]# git config --global alias.br branch
+[root@s55 sh_practice]# git config --global alias.l "log --oneline --graph"
+[root@s55 sh_practice]# git config --global alias.ls 'log --graph --pretty=format:"%h <%an> %ar %s"'
+[root@s55 sh_practice]# git config --list
+user.name=Jin
+user.email=70491992@qq.com
+alias.st=status
+alias.co=checkout
+alias.br=branch
+alias.l=log --oneline --graph
+alias.ls=log --graph --pretty=format:"%h <%an> %ar %s"
+
+使用
+1 进入代码目录 初始化  
+[root@s55 sh_practice]# git init
+初始化空的 Git 版本库于 /sh_practice/.git/
+2. 查看当前装太
+[root@s55 sh_practice]# git status
+3. 将源代码存入暂存区
+git add exam01.sh
+git add *.sh
+git add --all
+4.当源代码改动过后
+可以通过 git status 查看变动情况
+使用git add 再将源代码存入暂存区
+
+5.代码提交仓库(repository)
+[root@s55 sh_practice]# git commit -m "这是我今天编的代码"
+[root@s55 sh_practice]# git l
+* 1aab569 这是我今天编的代码
+[root@s55 sh_practice]# git ls
+* 1aab569 <Jin> 2 分钟之前 这是我今天编的代码
+[root@s55 sh_practice]# 
+
+
+
+
+
+
+
+
+
+

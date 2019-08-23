@@ -1,0 +1,454 @@
+循环
+while循环
+循环
+while循环
+
+while expression:
+  statement1
+  statement2
+  ...
+
+
+	
+List
+>>> v1=100
+>>> v2='ABC'
+>>> v3=[1,2,3,4]
+>>> v4=['A','a','XYZ','abc']
+>>> v5=[1,2,'A','b','C']
+>>> v6=[3,4,'x','y',]
+>>> print(v3)
+[1, 2, 3, 4]
+>>> print(v4)
+['A', 'a', 'XYZ', 'abc']
+>>> print(v4[0])
+A
+>>> print(v5[3])
+b
+>>> v8=[1,2,'a','A',[100,'XYZ']]
+>>> print(v8)
+[1, 2, 'a', 'A', [100, 'XYZ']]
+>>> print(v8[2])
+a
+>>> print(v8[4])
+[100, 'XYZ']
+>>> print(v8[4][0])
+100
+
+
+List-----Strings 列表在某些方面类似字符
+>>> print(v11)
+['a', 'b', 'c', 'd', 'e', 'f', 'g']
+>>> print(v10)
+abcdefg
+>>> print(v11[3])
+d
+>>> print(v10[3])
+d
+
+>>> print(v8)
+[1, 2, 'a', 'A', [100, 'XYZ']]
+>>> print(v8[4][1][2])
+Z
+
+
+
+List的操作
+字符串 + *
+>>> v12=[1,2,'A','c']
+>>> print (v12)
+[1, 2, 'A', 'c']
+>>> print (v12+[3,4,'x','y'])
+[1, 2, 'A', 'c', 3, 4, 'x', 'y']
+>>> print (v12*2)
+[1, 2, 'A', 'c', 1, 2, 'A', 'c']
+>>> print (v12[3])
+c
+>>> print (v12[4])
+Traceback (most recent call last):
+  File "<pyshell#43>", line 1, in <module>
+    print (v12[4])
+IndexError: list index out of range
+
+使用in关键字检查项目是否在list中存在
+>>> v13=['a','b','c','d']
+>>> 'b' in v13
+True
+>>> print('b' in v13)
+True
+>>> print('x' in v13)
+False
+
+
+
+List的Method和Function
+
+Method 方法
+append/insert/index
+>>> v15='hello'
+>>> v15='hello world' 字符不可以修改
+列表可以修改
+>>> v16=['abc',1,2]
+>>> v16.append(3)
+>>> print(v16)
+['abc', 1, 2, 3]
+>>> v16.append(4,5)
+Traceback (most recent call last):
+  File "<pyshell#54>", line 1, in <module>
+    v16.append(4,5)
+TypeError: append() takes exactly one argument (2 given)
+>>> v16.append('ABC')
+>>> print(v16)
+['abc', 1, 2, 3, 'ABC']
+>>> v16.insert(1,0)
+>>> print(v16)
+['abc', 0, 1, 2, 3, 'ABC']
+
+count
+remove
+reverse
+>>> v17=[0,1,2,1,2,1,2,3,4,5,1,2]
+>>> v17.count(1)
+4
+>>> v17.count(8)
+0
+>>> v17.remove(1)
+>>> print(v17)
+[0, 2, 1, 2, 1, 2, 3, 4, 5, 1, 2]
+>>> v17.count(1)
+3
+>>> v17.remove(8)
+Traceback (most recent call last):
+  File "<pyshell#65>", line 1, in <module>
+    v17.remove(8)
+ValueError: list.remove(x): x not in list
+>>> v17.reverse()
+>>> print(v17)
+[2, 1, 5, 4, 3, 2, 1, 2, 1, 2, 0]
+
+function
+len
+max
+min
+>>> print(v17)
+[2, 1, 5, 4, 3, 2, 1, 2, 1, 2, 0]
+>>> len(v17)
+11
+>>> max(v17)
+5
+>>> min(v17)
+0
+>>> print(v16)
+['abc', 0, 1, 2, 3, 'ABC']
+>>> max(v17)
+5
+>>> max(v16)
+Traceback (most recent call last):
+  File "<pyshell#74>", line 1, in <module>
+    max(v16)
+TypeError: '>' not supported between instances of 'int' and 'str'
+>>> len(v16)
+6
+>>> v18=['A','B','a']
+>>> max(v18)
+'a'
+>>> min(v18)
+'A'
+>>> v18.append('BIG')
+>>> min(v18)
+'A'
+
+list 将可迭代的序列化数据类型转换为列表
+int 
+float
+字符
+元组()
+dict{'key':'value','key':'value'}
+set 集合
+
+
+>>> v19=list('ABCD')
+>>> v19
+['A', 'B', 'C', 'D']
+>>> v20=list('ABCD','XYZZ','CCDD')
+Traceback (most recent call last):
+  File "<pyshell#91>", line 1, in <module>
+    v20=list('ABCD','XYZZ','CCDD')
+TypeError: list expected at most 1 arguments, got 3
+>>> v20=('ABCD','XYZZ','CCDD')
+>>> v21=list(v20)
+>>> v21
+['ABCD', 'XYZZ', 'CCDD']
+>>> v19=list('ABCD')
+>>> v19
+['A', 'B', 'C', 'D']
+>>> v20=list('ABCD','XYZZ','CCDD')
+Traceback (most recent call last):
+  File "<pyshell#91>", line 1, in <module>
+    v20=list('ABCD','XYZZ','CCDD')
+TypeError: list expected at most 1 arguments, got 3
+>>> v20=('ABCD','XYZZ','CCDD')
+>>> v21=list(v20)
+>>> v21
+['ABCD', 'XYZZ', 'CCDD']
+>>> v22={'alice':'F','bob':'M','Chralie':'M'}
+>>> v22
+{'alice': 'F', 'bob': 'M', 'Chralie': 'M'}
+>>> list(v22)
+['alice', 'bob', 'Chralie']
+>>> list(v22.values)
+Traceback (most recent call last):
+  File "<pyshell#98>", line 1, in <module>
+    list(v22.values)
+TypeError: 'builtin_function_or_method' object is not iterable
+>>> list(v22.values())
+['F', 'M', 'M']
+
+集合转换为列表
+>>> v23={1,2,'a','ss'}
+>>> v23
+{1, 2, 'a', 'ss'}
+>>> list(v23)
+[1, 2, 'a', 'ss']
+>>> 
+
+Range转换为列表
+>>> range(1,100)
+range(1, 100)
+>>> range(1,100,2)
+range(1, 100, 2)
+>>> range(10)
+range(0, 10)
+>>> list(range(2,20,2))
+[2, 4, 6, 8, 10, 12, 14, 16, 18]
+>>> 
+
+'hello world'
+
+h
+e
+l
+
+
+
+d
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for循环
+示例
+
+	
+函数和模块
+Function and Modules
+ 
+	 DRY Dont Repeat Yourself
+	 
+	 WET Write Everything Twice	 
+代码重用
+
+print()
+range(1,20,3)
+int('111')
+float()
+str()	  
+	  
+	  预定义函数
+	  自己创建def
+def fun1():
+	语句	
+def fun2(v1,v2,v3):
+    print('hello  '+v1+v2+v3)
+
+
+fun2('1','A','Python')
+    
+def fun3():
+    return 100
+
+print(fun3())
+
+
+
+
+def fun4(M,N):
+    if M>N:
+        return M
+    else:
+        return N
+
+
+#v1=fun4(100,200)
+#print(v1)
+print(fun4(100,200))
+
+
+def fun5(v1,v2):
+    RE=v1+v2
+    return RE
+
+#执行函数
+x=100
+y=200
+add=fun5
+v1=add(x,y) #执行函数 并将返回值赋予变量v1
+"""
+print(v1)
+print(v1+20)
+"""
+print(v1*20)
+
+----
+def fun01(v1,v2):
+    return v1+v2
+def fun02(v1,v2):
+    return v1-v2
+def fun03(v1,v2):
+    return v1*v2
+def fun04(v1,v2):
+    return v1/v2
+"""
+print(fun01(1000,200))
+print(fun02(1000,200))
+print(fun03(1000,200))
+print(fun04(1000,200))
+"""
+def fun7(v01,v02,v03):
+     #return v01+v02
+     #return fun6(v01,v02)
+     return v03(v01,v02)
+print(fun7(1000,2000,fun01))
+print(fun7(1000,2000,fun02))
+print(fun7(1000,2000,fun03))
+print(fun7(1000,2000,fun04))
+
+----
+import random
+print(random.randint(1,6))
+
+import math
+print(math.pi)
+print(math.sqrt(4))
+
+#from math import pi,sqrt
+from math import *
+print(pi)
+print(sqrt(4))
+
+
+
+
+
+
+
+
+
+	
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+参数可以是常量
+fun6(100,200)
+参数可以是变量
+x=100
+y=200
+fun6(x,y)
+------------------
+变量赋值 的数据类型 int float str list set  function
+z=fun6
+v3=fun6
+
+fun7(v1,v2,v3):
+  return v3(v1,v2)  # return fun6(1000,2000)
+
+def fun6(v1,v2):
+    return v1+v2
+
+v3=fun6(100,200)
+add=fun6
+
+def fun7(v01,v02,v03):
+     return v03(v01,v02)
+
+print(fun7(1000,2000,add))
+
+
+
+Python标准模块
+math random datetime string re os  mutilprocessing subprocess  email socket doctest
+json,sys。。。
+www.python.org
+python -m pip install --upgrade pip
+
+第三方模块 python Package Index  pip
+C:\Users\EDZ\AppData\Local\Programs\Python\Python37\exam>pip -V
+pip 19.0.3 from c:\users\edz\appdata\local\programs\python\python37\lib\site-packages\pip (python 3.7)
+
+C:\Users\EDZ\AppData\Local\Programs\Python\Python37\exam>pip install ansible
+Collecting ansible
+  Downloading https://files.pythonhosted.org/packages/93/cd/914c5f323b705afc53e521afe591490e5eb0bf118ec144547eb6cf84a87c/ansible-2.8.4.tar.gz (14.3MB)
+    21% |███████
+
+
+
+echo "# PythonTest" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/JinlingTest/PythonTest.git
+git push -u origin master
+
+
+def myadd(n1,n2):
+    return str(n1+n2)
+def mysub(n1,n2):
+    return str(n1-n2)
+def mymul(n1,n2):
+    return str(n1*n2)
+def mydiv(n1,n2):
+    return str(n1/n2)
+while True:
+    print('=====这是一个加减乘除四则运算的脚本，请按提示输入所需的运算符号和运算数字======')
+    print('如果你需要加法,请输入+')
+    print('如果你需要减法,请输入-')
+    print('如果你需要乘法,请输入*')
+    print('如果你需要除法,请输入/')
+    print('如果退出，输入Q或q')
+    v1=input('在此输入运算符号: ')
+
+    if v1=='Q' or v1=='q':
+        break
+    elif v1=='+':
+        n1=int(input('Enter First Num: '))
+        n2=int(input('Enter Second Num: '))
+        print('你的答案是：'+myadd(n1,n2))
+    elif v1=='-':
+        n1=int(input('Enter First Num: '))
+        n2=int(input('Enter Second Num: '))
+        print('你的答案是：'+mysub(n1,n2))
+    elif v1=='*':
+        n1=int(input('Enter First Num: '))
+        n2=int(input('Enter Second Num: '))
+        print('你的答案是：'+mymul(n1,n2))
+    elif v1=='/':
+        n1=int(input('Enter First Num: '))
+        n2=int(input('Enter Second Num: '))
+        print('你的答案是：'+mydiv(n1,n2))
+

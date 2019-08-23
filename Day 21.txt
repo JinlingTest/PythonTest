@@ -1,0 +1,533 @@
+Managing Tables Using DML Statements
+DML--------INSERT  UPDATE   DELETE 
+DDL-------TRUNCATE清除 
+Control transactions  
+COMMIT ROLLBACK SAVEPOINT
+Read consistency
+FOR UPDATE clause in a SELECT statement
+
+
+
+INSERT INTO departments(department_id,
+department_name, manager_id, location_id)
+VALUES (370, 'Public Relations3', 100, 1700);
+
+INSERT INTO departments (department_id
+)
+VALUES (340);
+
+INSERT INTO departments
+VALUES (100, 'Finance', NULL, NULL);
+
+INSERT INTO employees
+VALUES (614,
+'Den', 'Raphealy',
+'DRAPHEAL@aa.com', '515.127.4561',
+TO_DATE('02 3, 2003', 'MM DD, YYYY'),
+'SA_REP', 11000, 0.2, 100, 60);
+
+INSERT INTO departments(department_id, department_name, location_id)
+VALUES (&department_id, '&department_name',&location);
+
+INSERT INTO sales_reps(id, name, salary, commission_pct)
+SELECT employee_id, last_name, salary, commission_pct
+FROM employees
+WHERE job_id LIKE '%REP%';
+
+create table emp as select * from employees where 1=2;
+select * from emp;
+
+
+
+
+
+UPDATE employees
+SET department_id = 50
+WHERE employee_id = 113;
+
+create table copy_emp as select * from employees;
+select * from copy_emp; 
+UPDATE copy_emp
+SET department_id = 110;
+rollback;
+
+UPDATE employees
+SET job_id='SA_MAN',salary=10000 
+WHERE employee_id = 103;
+
+UPDATE employees
+SET (job_id,salary) = (SELECT job_id,salary
+FROM employees
+WHERE employee_id = 205)
+WHERE employee_id = 103;
+
+UPDATE copy_emp
+SET department_id = (SELECT department_id
+FROM employees
+WHERE employee_id = 100)
+WHERE job_id = (SELECT job_id
+FROM employees
+WHERE employee_id = 200);
+
+DELETE FROM departments
+WHERE department_name = 'Finance';
+select count(*) from copy_emp;
+DELETE   copy_emp;
+rollback;
+truncate table copy_emp;
+DELETE FROM employees
+WHERE department_id IN
+(SELECT department_id
+FROM departments
+WHERE department_name
+LIKE '%Public%');
+
+
+Begin when the first DML SQL statement is executed.
+• End with one of the following events:
+– A COMMIT or ROLLBACK statement is issued.
+– A DDL or DCL statement executes (automatic commit).
+– The user exits SQL Developer or SQL*Plus.
+– The system crashes.
+12
+
+
+[root@db1 ~]# su - oracle
+Last login: Thu Jul 18 11:10:14 CST 2019 on pts/0
+[oracle@db1 ~]$ sqlplus / as sysdba
+
+SQL*Plus: Release 12.2.0.1.0 Production on Thu Jul 18 11:18:28 2019
+
+Copyright (c) 1982, 2016, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+
+SQL> shutdown abort;
+ORACLE instance shut down.
+SQL> startup
+ORACLE instance started.
+
+
+
+An automatic commit occurs in the following
+circumstances:
+– A DDL statement issued
+– A DCL statement issued
+– Normal exit from SQL Developer or SQL*Plus
+
+Read Consistency
+
+
+DDL
+CREATE DROP ALTER   (TRUNCATE清除)
+数据库对象
+表
+
+
+
+
+
+
+SQL> create table t1(id number NOT NULL,name char(10));
+
+Table created.
+
+SQL> create table t2 (id number,name char(10));
+
+Table created.
+
+SQL> alter table t2 modify id number NOT NULL;
+
+Table altered.
+
+SQL> insert into t1 values(1,'a');
+
+1 row created.
+
+SQL> insert into t1 values(NULL,'b');
+insert into t1 values(NULL,'b')
+                      *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("HR"."T1"."ID")
+
+
+SQL> 
+
+
+
+
+SQL> create table t3(id number CONSTRAINT t3_id_uk UNIQUE,name char(10));
+
+Table created.
+
+SQL> create table t4(id number ,name char(10));
+
+Table created.
+
+SQL> alter table t4 ADD CONSTRAINT t4_id_uk UNIQUE(id);
+
+Table altered.
+
+SQL> insert into t3 values(1,'aa');
+
+1 row created.
+
+SQL> insert into t3 values(1,'bb');
+insert into t3 values(1,'bb')
+*
+ERROR at line 1:
+ORA-00001: unique constraint (HR.T3_ID_UK) violated
+
+
+SQL> insert into t3 values(NULL,'bb');
+
+1 row created.
+
+SQL> 
+SQL> 
+SQL> create table t5 (id number CONSTRAINT t5_id_pk PRIMARY KEY,name char(10))
+  2  ;
+
+Table created.
+
+SQL> create table t6 (id number ,name char(10));
+
+Table created.
+
+SQL> alter table t6 ADD CONSTRAINT t6_id_pk PRIMARY KEY(id);
+
+Table altered.
+
+SQL> insert into t5 values(1,'aa');
+
+1 row created.
+
+SQL> insert into t5 values(2,'bb');
+
+1 row created.
+
+SQL> insert into t5 values(2,'cc');
+insert into t5 values(2,'cc')
+*
+ERROR at line 1:
+ORA-00001: unique constraint (HR.T5_ID_PK) violated
+
+
+SQL> insert into t5 values(NULL,'cc');
+insert into t5 values(NULL,'cc')
+                      *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("HR"."T5"."ID")
+
+
+SQL> 
+SQL> drop table students
+  2  ;
+drop table students
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+SQL> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SQL> create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10));
+
+Table created.
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number CONSTRAINT stus_cid_fk REFERENCE classes(class_id));
+create table students(stu_id number,stu_name varchar2(20),class_id number CONSTRAINT stus_cid_fk REFERENCE classes(class_id))
+                                                                          *
+ERROR at line 1:
+ORA-02253: constraint specification not allowed here
+
+
+SQL> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SQL> create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10));
+create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCE classes(class_id));
+create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCE classes(class_id))
+                                                                                                                       *
+ERROR at line 1:
+ORA-00905: missing keyword
+
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id));
+
+Table created.
+
+SQL> 
+
+
+
+
+
+SQL> create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10));
+create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id));
+create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> insert into classes values(1,'A');
+
+1 row created.
+
+SQL> insert into classes values(2,'B');
+
+1 row created.
+
+SQL> insert into students values(101,'Alice',1);
+
+1 row created.
+
+SQL> insert into students values(102,'Bob',1);
+
+1 row created.
+
+SQL> insert into students values(103,'Charlie',2);
+
+1 row created.
+
+SQL> insert into students values(104,'David',2);
+
+1 row created.
+
+SQL> insert into students values(105,'Edward',3);
+insert into students values(105,'Edward',3)
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (HR.STUS_CID_FK) violated - parent key not
+found
+
+
+SQL> insert into students values(105,'Edward',NULL);
+
+1 row created.
+
+SQL> 
+SQL> create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10));
+create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id));
+create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> create table studentsxx(stu_id number,stu_name varchar2(20),class_id number);
+
+Table created.
+
+SQL> alter table studentsxx ADD CONSTRAINT stuxx_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id);
+
+Table altered.
+
+SQL> drop table studentsxx;
+
+Table dropped.
+
+SQL> drop table students;
+
+Table dropped.
+
+SQL> drop table classes;
+
+Table dropped.
+
+SQL> 
+SQL> create table classes(class_id number CONSTRAINT class_cid_pk PRIMARY KEY,class_name char(10));
+
+Table created.
+
+SQL> create table students(stu_id number,stu_name varchar2(20),class_id number,CONSTRAINT stus_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id));
+
+Table created.
+
+SQL> create table studentsxx(stu_id number,stu_name varchar2(20),class_id number);
+
+Table created.
+
+SQL> alter table studentsxx ADD CONSTRAINT stuxx_cid_fk FOREIGN KEY(class_id) REFERENCES classes(class_id);
+
+Table altered.
+
+SQL> insert into classes values(1,'A');
+
+1 row created.
+
+SQL> insert into students values(101,'Alice',1);
+
+1 row created.
+
+SQL> insert into students values(102,'Bob',2);
+insert into students values(102,'Bob',2)
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (HR.STUS_CID_FK) violated - parent key not
+found
+
+
+SQL> 
+SQL> create table students2(stu_id number(5),stu_name varchar2(20),stu_age number(2) CONSTRAINT stu2_age_ck CHECK (stu_age BETWEEN 12 AND 18),stu_sex char(2) CONSTRAINT stu2_sex_ck CHECK (stu_sex IN ('男','女')));
+
+Table created.
+
+SQL> insert into students2 values (1,'alice',15,'女');
+insert into students2 values (1,'alice',15,'女')
+                                           *
+ERROR at line 1:
+ORA-12899: value too large for column "HR"."STUDENTS2"."STU_SEX" (actual: 9,
+maximum: 2)
+
+
+SQL> alter table students modify stu_sex char(4);
+
+SQL> insert into students2 values (1,'alice',15,'女');
+insert into students2 values (1,'alice',15,'女')
+                                           *
+ERROR at line 1:
+ORA-12899: value too large for column "HR"."STUDENTS2"."STU_SEX" (actual: 9,
+maximum: 2)
+
+
+SQL> 
+
+
+
+
+
+
+
+
+
+
+SQL> drop table students2;
+
+Table dropped.
+
+SQL> create table students2(stu_id number(5),stu_name varchar2(20),stu_age number(2) CONSTRAINT stu2_age_ck CHECK (stu_age BETWEEN 12 AND 18),stu_sex char(1) CONSTRAINT stu2_sex_ck CHECK (stu_sex IN ('M','F','m','f')));
+
+Table created.
+
+SQL> insert into students2 values(1,'george',15,'M');
+
+1 row created.
+
+SQL> insert into students2 values(1,'fred',20,'M');
+insert into students2 values(1,'fred',20,'M')
+*
+ERROR at line 1:
+ORA-02290: check constraint (HR.STU2_AGE_CK) violated
+
+
+SQL> insert into students2 values(1,'fred',18,'X');
+insert into students2 values(1,'fred',18,'X')
+*
+ERROR at line 1:
+ORA-02290: check constraint (HR.STU2_SEX_CK) violated
+
+
+SQL> insert into students2 values(1,'fred',18,'m');
+
+1 row created.
+
+SQL> 
+
+
+SQL> create table students2(stu_id number(5),stu_name varchar2(20),stu_age number(2) CONSTRAINT stu2_age_ck CHECK (stu_age BETWEEN 12 AND 18),stu_sex char(1) CONSTRAINT stu2_sex_ck CHECK (stu_sex IN ('M','F','m','f')));
+
+SQL> 
+SQL> create table emp(id1 number,id2 number,name char(10),CONSTRAINT emp_id12_pk PRIMARY KEY(id1,id2));
+create table emp(id1 number,id2 number,name char(10),CONSTRAINT emp_id12_pk PRIMARY KEY(id1,id2))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> drop table emp;
+
+Table dropped.
+
+SQL> create table emp(id1 number,id2 number,name char(10),CONSTRAINT emp_id12_pk PRIMARY KEY(id1,id2));
+
+Table created.
+
+SQL> insert into emp values(1,1,'henry');
+
+1 row created.
+
+SQL> insert into emp values(1,2,'alice');
+
+1 row created.
+
+SQL> insert into emp values(2,1,'bob');
+
+1 row created.
+
+SQL> insert into emp values(1,2,'charlie');
+insert into emp values(1,2,'charlie')
+*
+ERROR at line 1:
+ORA-00001: unique constraint (HR.EMP_ID12_PK) violated
+
+
+
+
+
+
+
+
+
+

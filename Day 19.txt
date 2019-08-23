@@ -1,0 +1,262 @@
+SQL
+QUERY------SELECT
+DML--------INSERT  UPDATE   DELETE    MERGE
+DDL-------CREATE  ALTER  DROP删除  TRUNCATE清除
+DCL-------GRANT   REVOKE  
+TCL-------COMMIT ROLLBACK SAVEPOINT 
+
+RDBMS
+
+Retrieving Data Using
+the SQL SELECT Statement
+
+SELECT *|{[DISTINCT] column [alias],...}
+FROM table;
+
+Selecting All Columns
+SELECT * FROM employees;
+
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'A',
+    1000,2999
+  );
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'B',
+    3000,5999
+  );
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'C',
+    6000,9999
+  );
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'D',
+    10000,14999
+  );
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'E',
+    15000,24999
+  );
+INSERT
+INTO
+  JOB_GRADES VALUES
+  (
+    'F',
+    25000,40000
+  );
+SELECT
+  *
+FROM
+  JOB_GRADES;
+TRUNCATE
+  TABLE JOB_GRADES;
+--Selecting All Columns
+SELECT
+  *
+FROM
+  employees;
+SELECT
+  *
+FROM
+  departments;
+SELECT
+  *
+FROM
+  countries;
+SELECT
+  *
+FROM
+  locations;
+SELECT
+  *
+FROM
+  jobs;
+--Selecting Specific Columns
+SELECT
+  first_name,
+  last_name,
+  salary
+FROM
+  employees;
+
+----Arithmetic Expressions
+SELECT last_name,salary*14 FROM employees;
+
+----Defining a Null Value
+NULL 和任何值计算结果为NULL
+SELECT last_name,salary,commission_pct,salary*(1+commission_pct)  FROM employees;
+
+---Defining a Column Alias
+SELECT last_name "na me" ,salary*14 AS 年薪 FROM employees;
+
+---Concatenation Operator 
+select first_name||last_name from employees;
+select first_name||' '||last_name "Emp name" from employees;
+
+SELECT last_name ||' is a '||job_id
+AS "Employee Details"
+FROM employees;
+
+SELECT department_name||' 的经理是：'||manager_id
+FROM departments;
+SELECT department_name||q'[Department's Manager Id: ]'||manager_id
+FROM departments;
+SELECT department_name||q'#Department's Manager Id: #'||manager_id
+FROM departments;
+
+ SELECT department_id FROM departments;
+SELECT department_id from employees;
+SELECT DISTINCT department_id from employees;
+
+
+
+--Restricting and Sorting Data
+
+SELECT *|{[DISTINCT] column [alias],...}
+FROM table
+[WHERE logical expression(s)];
+Limit the rows that are retrieved by a query
+The WHERE clause
+=, <=, BETWEEN, IN, LIKE（% _）, and NULL conditions
+AND, OR, and NOT operators
+SELECT last_name,salary
+FROM employees
+--WHERE department_id=50 
+--WHERE salary BETWEEN 5000 AND 7000;
+--WHERE department_id=10 OR department_id=20 OR department_id=30;
+--WHERE department_id IN (10,20,30); 
+--WHERE last_name='Smith';
+--WHERE last_name LIKE 'S%'
+WHERE salary>&v1;
+--ORDER BY salary;
+--ORDER BY salary DESC;
+--FETCH FIRST 5 ROWS ONLY;
+--OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY;
+
+SELECT last_name
+FROM employees
+WHERE hire_date = '17-OCT-03' ;
+
+DEFINE  employee_num=123
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE employee_id = &employee_num ;  
+
+UNDEFINE employee_num  
+
+SELECT last_name
+FROM employees
+WHERE hire_date = '17-OCT-03' ;
+WHERE salary>&v1;
+
+
+
+Olson	2100
+Markle	2200
+Philtanker	2200
+Landry	2400
+Gee	2400
+Sullivan	2500
+Vargas	2500
+Patel	2500
+Marlow	2500
+Perkins	2500
+
+Substitution variables
+&v1
+SQL ANSI
+Oracle  PL/SQL  -----PL/SQL Block 
+function .....
+Using Single-Row Functions to Customize Output
+<SQL Language Reference>
+
+Character/Number/Date/Conversion/General
+
+字符函数
+LOWER('SQL Course') sql course
+INITCAP('SQL Course') Sql Course
+UPPER('SQL Course') SQL COURSE
+SELECT employee_id, last_name, department_id
+FROM employees
+WHERE last_name = 'higgins';
+
+SELECT employee_id, last_name, department_id
+FROM employees
+WHERE LOWER(last_name) = 'higgins';
+
+CONCAT('Hello', 'World') HelloWorld
+select CONCAT('Hello', 'World') from dual;
+SUBSTR('HelloWorld',1,5) Hello
+LENGTH('HelloWorld') 10
+INSTR('HelloWorld', 'W') 6
+LPAD(last_name,12,'-')  左填充
+RPAD(first_name, 12, '-') 
+
+SELECT CONCAT(CONCAT(last_name, '''s job category is '), job_id)
+"Job" FROM employees
+WHERE SUBSTR(job_id, 4) = 'REP';
+
+SELECT employee_id, CONCAT(first_name, last_name) NAME,
+LENGTH (last_name), INSTR(last_name, 'a') "Contains 'a'?"
+FROM employees
+WHERE SUBSTR(last_name, -1, 1) = 'n';
+
+
+Number functions
+ROUND: Rounds value to a specified decimal
+• TRUNC: Truncates value to a specified decimal
+• CEIL: Returns the smallest whole number greater than or
+equal to a specified number
+• FLOOR: Returns the largest whole number equal to or less
+than a specified number
+• MOD: Returns remainder of division
+
+
+MONTHS_BETWEEN Number of months between two dates
+ADD_MONTHS Add calendar months to dates NEXT_DAY Week day of the date specified
+LAST_DAY Last day of the month
+ROUND Round date
+TRUNC Truncate date
+MONTHS_BETWEEN 19.6774194
+('01-SEP-05','11-JAN-04')
+ADD_MONTHS ('31-JAN-04',1) '29-FEB-04'
+NEXT_DAY ('01-SEP-05','FRIDAY') '08-SEP-05'
+LAST_DAY ('01-FEB-05') '28-FEB-05'
+
+
+ROUND(SYSDATE,'MONTH') 01-AUG-19
+ROUND(SYSDATE ,'YEAR') 01-JAN-20
+TRUNC(SYSDATE ,'MONTH') 01-JUL-19
+TRUNC(SYSDATE ,'YEAR') 01-JAN-19
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,212 @@
+﻿MHA
+(检测主从)
+检测Master状态 
+发生故障 将一台从库转成主库（MHA配置文件决定）  其他从库改变Master为新Master
+（MHA配置文件决定）
+MHA启动 
+masterha_manager
+masterha_manager --conf=/etc/app1.cnf （前台启动）
+建议以后后台启动
+nohup masterha_manager --conf=/etc/app1.cnf < /dev/null > /var/log/masterha/app1/app1.log 2>&1 &
+
+默认配置文件 /etc/masterha_default.cnf
+指定配置文件 --conf=/etc/app1.cnf
+Master  s51     (node)	
+Slave   s52		(node)
+Slave   s53		(node)
+
+wget https://github.com/yoshinorim/mha4mysql-manager/releases/download/v0.58/mha4mysql-manager-0.58-0.el7.centos.noarch.rpm
+wget https://github.com/yoshinorim/mha4mysql-node/releases/download/v0.58/mha4mysql-node-0.58-0.el7.centos.noarch.rpm
+
+Manager mysqlc  (manager +node)
+Master  s51     (node)	
+Slave   s52		(node)
+Slave   s53		(node)
+主机名解析
+echo '192.168.0.200 mysqlc' >> /etc/hosts
+echo '192.168.0.51 s51' >> /etc/hosts
+echo '192.168.0.52 s52' >> /etc/hosts
+echo '192.168.0.53 s53' >> /etc/hosts
+ssh 互信
+1
+# ssh-keygen -t rsa
+  220  ssh-copy-id s51
+  221  ssh-copy-id s52
+  222  ssh-copy-id s53
+2.
+   47  ssh-copy-id mysqlc
+   48  ssh-copy-id s52
+   49  ssh-copy-id s53
+3.
+   44  ssh-copy-id mysqlc
+   45  ssh-copy-id s51
+   46  ssh-copy-id s53
+4.
+   37  ssh-copy-id mysqlc
+   38  ssh-copy-id s51
+   39  ssh-copy-id s52   
+   
+
+  
+  
+Simple Failover
+Building normal replication environments
+MHA does not build replication environments by itself, so you need to setup replication by yourself. In other words, you can use MHA on existing environments. As an example, suppose there are four hosts: host1, host2, host3, host4. Master is currently running on host1, and two slaves are running on host2 and host3. So MySQL servers are running on host1, host2 and host3. Let's run MHA Manager on host4(manager_host).
+
+Installing MHA Node on host1-host4
+See Installing MHA Node
+On RHEL/CentOS distribution, you can install MHA Node rpm package as below.
+
+## If you have not installed DBD::mysql, install it like below, or install from source.
+# yum install perl-DBD-MySQL
+## Get MHA Node rpm package from "Downloads" section.
+# rpm -ivh mha4mysql-node-X.Y-0.noarch.rpm
+
+Installing MHA Manager
+
+On RHEL/CentOS distribution, you can install MHA Manager rpm package as below.
+
+## Install dependent Perl modules
+# yum install perl-DBD-MySQL
+# yum install perl-Config-Tiny
+# yum install perl-Log-Dispatch
+# yum install perl-Parallel-ForkManager
+
+## Install MHA Node, since MHA Manager uses some modules provided by MHA Node.
+# rpm -ivh mha4mysql-node-X.Y-0.noarch.rpm
+
+## Finally you can install MHA Manager
+# rpm -ivh mha4mysql-manager-X.Y-0.noarch.rpm  ????????
+解决
+  194  yum install epel-release
+  195  yum localinstall mha4mysql-manager-0.58-0.el7.centos.noarch.rpm 
+
+
+
+
+--------
+Creating a config file
+Next step is creating a configuration file on MHA Manager. Parameters include hostname of each MySQL server, MySQL username and password, MySQL replication username and password, working directory name, etc. The whole parameters are described at Parameters page.
+在Manager机器
+[root@mysqlc ~]# cat /etc/app1.cnf
+[server default]
+# mysql user and password
+user=root
+password=123
+ssh_user=root
+# repl user and password
+repl_user=repl
+repl_password=123456
+
+# working directory on the manager
+manager_workdir=/var/log/masterha/app1
+# working directory on MySQL servers
+remote_workdir=/var/log/masterha/app1
+
+[server1]
+hostname=s51
+
+[server2]
+hostname=s52
+
+[server3]
+hostname=s53
+
+
+Note that you do not specify that host1 is a current master. MHA automatically detects current master internally.
+
+Checking SSH connections检测SSH
+# masterha_check_ssh --conf=/etc/app1.cnf
+
+Checking Replication Configuration
+  230  masterha_check_ssh --conf=/etc/app1.cnf
+  231  masterha_check_repl --conf=/etc/app1.cnf
+
+MYSQL配置
+[root@s51 ~]# tail /etc/my.cnf
+
+validate_password=0
+server-id=51
+log_bin=/var/lib/mysql/mysql-bin
+binlog-do-db=world
+binlog-ignore-db=mysql
+
+
+[root@s52 ~]# tail /etc/my.cnf
+
+validate_password=0
+server-id=52
+log_bin=/var/lib/mysql/mysql-bin
+read_only=1
+relay_log_purge=0
+binlog-do-db=world
+binlog-ignore-db=mysql
+
+
+[root@s53 ~]# tail /etc/my.cnf
+validate_password=0
+server-id=53
+log_bin=/var/lib/mysql/mysql-bin
+read_only=1
+relay_log_purge=0
+binlog-do-db=world
+binlog-ignore-db=mysql
+
+！！！User repl does not exist or does not have REPLICATION SLAVE privilege! Other slaves can not start replication from this host.
+在s51 s52 s53
+mysql> grant replication slave on *.* to repl@'192.168.0.%' identified by "123456"; 
+
+ All SSH connection tests passed successfully.
+
+Fri Aug  2 14:08:33 2019 - [warning] master_ip_failover_script is not defined.
+Fri Aug  2 14:08:33 2019 - [warning] shutdown_script is not defined.
+
+MySQL Replication Health is OK.
+
+添加
+# 主库故障转移脚本
+master_ip_failover_script=/root/master_ip_failover
+
+下载 /root/master_ip_failover
+chmod +x /root/master_ip_failover
+
+MHA启动 
+masterha_manager
+masterha_manager --conf=/etc/app1.cnf （前台启动）
+如果是前台运行 Ctrl+c停止
+
+
+建议以后后台启动
+nohup masterha_manager --conf=/etc/app1.cnf < /dev/null > /var/log/masterha/app1/app1.log 2>&1 &
+
+停止 
+masterha_stop --conf=/etc/app1.cnf
+
+查看状态
+[root@mysqlc ~]# masterha_check_status --conf=/etc/app1.cnf
+app1 is stopped(2:NOT_RUNNING).
+
+
+
+
+附：如果需要漂移IP地址
+在s51
+echo 'ip addr add 192.168.0.50 dev ens33' >> /etc/rc.d/rc.local
+chmod +x /etc/rc.d/rc.local
+
+
+
+
+MHA 每次成功 failover
+生产 空文件 /var/log/masterha/app1/app1.failover.complete 记载时间
+rm /var/log/masterha/app1/app1.failover.complete
+masterha_manager --conf=/etc/app1.cnf
+ 
+ 
+
+
+
+
+
+
+

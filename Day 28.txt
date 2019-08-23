@@ -1,0 +1,246 @@
+MySQL 主从
+
+Master server00 192.168.0.20
+Slave  server03 192.168.0.23
+MySQL 5.7.27
+
+Master---Slave
+(所有的库)--
+（几个业务库）--
+（库中的表）---
+
+1.FailOver 故障切换 主服务器运行业务 故障时 业务切换到从服务器
+2.Backup Server
+3.高性能 读写分离  主服务器 写   从服务器 读
+
+利用二进制日志 
+Master:
+my.cnf
+server-id=1
+log_bin=/var/lib/mysql/mysql-bin
+binlog-do-db=world
+binlog-ignore-db=mysql
+建立账号 给权限 replication slave
+mysql> grant replication slave on *.* to repl@'192.168.0.%' identified by "123456";
+
+mysql> show master status;
+
+在Slave服务器 创建Wolrd数据库 并保证数据和主服务器一支
+（mysqldump----mysql）
+
+检查主从版本是否一致
+# mysql --login-path=r -e "select version()";
+# mysql --login-path=r -e "show variables like 'version'";
+在从服务器的主机上 测试主服务器复制账号
+[root@server03 ~]# mysqlshow -urepl -p123456 -h192.168.0.20
+mysqlshow: [Warning] Using a password on the command line interface can be insecure.
++--------------------+
+|     Databases      |
++--------------------+
+| information_schema |
++--------------------+
+只能看到 information_schema
+
+配置从服务器
+server-id=2
+ 
+mysql> show slave status;
+Empty set (0.00 sec)
+
+在主服务器上查看binlog信息
+]# mysql --login-path=r -e "show MASTER STATUS";
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000008 |      447 | world        | mysql            |                   |
++------------------+----------+--------------+------------------+-------------------+
+
+mysql> change master to master_host='192.168.0.20',master_user='repl',master_password='123456';
+Query OK, 0 rows affected, 2 warnings (0.04 sec)
+或
+ change master to master_host='192.168.0.20',master_user='repl',master_password='123456',master_log_file='mysql-bin.000008',master_log_pos=447;
+mysql> start slave;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show slave status\G
+
+对应Clone机器 UUID相同 更GAI
+[root@server00 mysql]# cat auto.cnf 
+[auto]
+server-uuid=258b038a-af4b-11e9-b041-000c2923fcaf
+# mysql -uroot -p1234 -e "select uuid()";
++--------------------------------------+
+| uuid()                               |
++--------------------------------------+
+| b01a72ee-b273-11e9-aede-000c2923fcaf |
++--------------------------------------+
+
+mysql> show slave status\G
+*************************** 1. row ***************************
+。。。。。。。。。。
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+
+-------------
+MySQL Cluster CGE (commercial)
+MySQL Cluster （GPL）Community
+Red Hat Enterprise Linux 7 / Oracle Linux 7 (x86, 64-bit), RPM Bundle	7.6.11	683.6M	(mysql-cluster-community-7.6.11-1.el7.x86_64.rpm-bundle.tar)
+
+7.6.9
+
+5个CentOS
+1 Manager Node  m01		192.168.0.71
+2 Data Node		d01 d02	192.168.0.61--62
+2 SQL  			s01 s02 192.168.0.51--52
+
+hostnamectl set-hostname m01
+uuidgen ens33
+/etc/sysconfig/network-scripts/ifcfg-ens33
+UUID=
+IPADDR=
+GATAWAY=
+DNS1=
+systemctl restart network
+
+/etc/hosts
+192.168.0.71	m01
+192.168.0.61	d01
+192.168.0.62	d02
+192.168.0.51	s01
+192.168.0.52	s02
+
+1.管理节点 （管理集群 MYSQL Cluster启动停止）
+配置文件 路径 文件名 自定义
+[ndbd default]
+NoOFReplicas=2
+DataMemory=512M
+IndexMemory=256M
+[ndb_mgmd]
+nodeid=1
+datadir=/var/lib/mysql
+HostName=m01
+[ndbd]
+nodeid=2
+datadir=/var/lib/mysql
+HostName=d01
+[ndbd]
+nodeid=3
+datadir=/var/lib/mysql
+HostName=d02
+[mysqld]
+nodeid=4
+HostName=s01
+[mysqld]
+nodeid=5
+HostName=s02
+
+
+先手工启动管理节点 
+
+
+存储节点 d01 d02
+my.cnf
+ndbcluster
+ndb_connectstring=m01
+[mysql_cluster]
+ndb_connectstring=m01
+
+
+
+-----
+1.安装ftp服务器 将tar包释放到 ftp目录
+yum install vsftpd ftp
+systemctl enable vsftpd
+systemctl start vsftpd
+tar xf mysql-cluster-community-7.6.9-1.el7.x86_64.rpm-bundle.tar -C /var/ftp/pub
+
+2.在所有服务器 清除mysql旧版本 
+# yum remove mariadb* mysql* -y
+3.在所有服务器 更新yum源 
+# yum -y install epel-release
+4.在所有服务器 安装 MySQL Cluster
+mysql-cluster-community-server-7.6.9-1.el7.x86_64.rpm
+mysql-cluster-community-common-7.6.9-1.el7.x86_64.rpm
+mysql-cluster-community-client-7.6.9-1.el7.x86_64.rpm
+mysql-cluster-community-libs-7.6.9-1.el7.x86_64.rpm
+
+yum -y localinstall ftp://192.168.0.71/pub/{mysql-cluster-community-server-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-common-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-client-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-libs-7.6.9-1.el7.x86_64.rpm}
+或 在本地释放tar包
+yum -y localinstall mysql-cluster-community-server-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-common-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-client-7.6.9-1.el7.x86_64.rpm,mysql-cluster-community-libs-7.6.9-1.el7.x86_64.rpm
+
+5.在存储节点安装 data包
+yum -y localinstall ftp://192.168.0.71/pub/mysql-cluster-community-data-node-7.6.9-1.el7.x86_64.rpm
+
+6.在管理节点安装manager
+yum -y localinstall ftp://192.168.0.71/pub/mysql-cluster-community-management-server-7.6.9-1.el7.x86_64.rpm
+
+
+7.管理节点配置
+
+[root@m01 ~]# cat /usr/mysql-cluster/cluster.cnf
+[ndbd default]
+NoOfReplicas=2
+DataMemory=512M
+
+[ndb_mgmd]
+nodeid=1
+datadir=/var/lib/mysql
+HostName=m01
+
+[ndbd]
+nodeid=2
+datadir=/var/lib/mysql
+HostName=d01
+[ndbd]
+nodeid=3
+datadir=/var/lib/mysql
+HostName=d02
+
+[mysqld]
+nodeid=4
+HostName=s01
+[mysqld]
+nodeid=5
+HostName=s02
+
+
+8.数据节点配置
+cp /etc/my.cnf{,.bak}
+echo 'ndbcluster'>>/etc/my.cnf
+echo 'ndb-connectstring=m01' >>/etc/my.cnf
+echo '[mysql_cluster]'>>/etc/my.cnf
+echo 'ndb-connectstring=m01' >>/etc/my.cnf
+
+9.SQL节点配置
+cp /etc/my.cnf{,.bak}
+echo 'ndbcluster'>>/etc/my.cnf
+echo 'ndb-connectstring=m01' >>/etc/my.cnf
+echo '[mysql_cluster]'>>/etc/my.cnf
+echo 'ndb-connectstring=m01' >>/etc/my.cnf
+sed -i '/datadir/d' /etc/my.cnf
+
+
+10.启动顺序 先 管理节点---再 数据节点--最后 SQL节点（关闭反向）
+
+管理节点 
+# ndb_mgmd --ndb_nodeid=1 --initial -f /usr/mysql-cluster/cluster.cnf
+# netstat -antup|grep 1186
+数据节点 
+# ndbd --initial
+# ndbd --initial
+SQL节点
+# systemctl start mysqld
+# systemctl start mysqld
+
+11.集中管理
+管理节点 
+# ndb_mgm
+ndb_mgm> show
+
+
+
+
+
+
+
+

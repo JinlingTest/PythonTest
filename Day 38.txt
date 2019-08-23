@@ -1,0 +1,336 @@
+ D2
+ 
+ 192.168.0.105
+ 
+ yum -y install ipvsadm
+ 
+ 
+ 47  cp -a ifcfg-ens33{,:0}
+   48  vi ifcfg-ens33:0
+   
+	NAME=ens33:0
+	DEVICE=ens33:0
+	ONBOOT=yes
+	IPADDR=192.168.0.100 
+ 
+ [root@s105 network-scripts]# ifup ens33:0
+ERROR     : [/etc/sysconfig/network-scripts/ifup-eth] Error, some other host (00:0C:29:CB:6E:3C) already uses address 192.168.0.100.
+/etc/sysconfig/network-scripts/ifup-eth
+/arpcheck
+注释掉arp检测相关脚本
+
+                  #  if [ $? = 1 ]; then
+                   #     ARPINGMAC=$(echo $ARPING |  sed -ne 's/.*\[\(.*\)\].*/\1/p')
+                    #    net_log $"Error, some other host ($ARPINGMAC) already uses address ${ipaddr[$id
+x]}."
+                     #   exit 1
+                   # fi
+
+启动该接口 ifup ens33:0	
+
+需要部署 主从设置软件 HAC
+keepalived
+LVS的主从都需安装keepalived
+yum install keepalived
+
+
+历史 vrrp 
+
+VIP 192.168.0.100
+RS 192.168.0.102-104
+DR
+rr
+
+
+
+# for electing MASTER, highest priority wins.
+           # to be MASTER, make this 50 more than on other machines.
+           priority 100
+
+
+
+! Configuration File for keepalived
+
+global_defs {
+   router_id s101
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 10
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 7777
+    }
+    virtual_ipaddress {
+        192.168.0.100
+    }
+}
+
+virtual_server 192.168.0.100 80 {
+    delay_loop 2
+    lvs_sched wrr
+    lvs_method DR
+    protocol TCP
+
+    real_server 192.168.0.102 80 {
+        weight 1
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+    real_server 192.168.0.103 80 {
+        weight 2
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+    real_server 192.168.0.104 80 {
+        weight 3
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+}			   
+
+
+
+[root@s105 keepalived]# vi keepalived.conf         
+
+! Configuration File for keepalived
+
+global_defs {
+   router_id s105
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 10
+    priority 40
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 7777
+    }
+    virtual_ipaddress {
+        192.168.0.100
+    }
+}
+
+virtual_server 192.168.0.100 80 {
+    delay_loop 2
+    lvs_sched rr
+    lvs_method DR
+    protocol TCP
+
+    real_server 192.168.0.102 80 {
+        weight 1
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+    real_server 192.168.0.102 80 {
+        weight 1
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+    real_server 192.168.0.103 80 {
+        weight 2
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+    real_server 192.168.0.104 80 {
+        weight 3
+        TCP_CHECK
+        {
+        connect_port 80
+        connect_timeout 5
+        retry 3
+        delay_before_retry 4
+        }
+    }
+
+}
+
+
+
+
+Nginx LB
+
+被负载均衡的
+192.168.0.152 153
+
+安装apache 设置网页 （网页不一样是为了测试D负载调度器吧用户请求调度到不同的RS； 在生产环境中 网页必须一致性提供给客户   一般让多个 Server使用后台共享存储）
+yum -y install httpd
+systemctl enable httpd
+systemctl start httpd
+echo "<H1> this is Server152</H1>" > /var/www/html/index.html
+curl localhost
+elinks http://localhost
+
+yum -y install httpd
+systemctl enable httpd
+systemctl start httpd
+echo "<H1> this is Server155/H1>" > /var/www/html/index.html
+curl localhost
+elinks http://localhost
+
+
+
+S151 Nginx作为LBC集群的调度器
+[root@s151 ~]# vi /etc/nginx/nginx.conf
+
+# For more information on configuration, see:
+#   * Official English Documentation: http://nginx.org/en/docs/
+#   * Official Russian Documentation: http://nginx.org/ru/docs/
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+# Load dynamic modules. See /usr/share/nginx/README.dynamic.
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+# For more information on configuration, see:
+#   * Official English Documentation: http://nginx.org/en/docs/
+#   * Official Russian Documentation: http://nginx.org/ru/docs/
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+# Load dynamic modules. See /usr/share/nginx/README.dynamic.
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+upstream myweb {
+        server 192.168.0.152:80;
+        server 192.168.0.153:80;
+
+}
+
+    server {
+        listen       80 default_server;
+        listen       [::]:80 default_server;
+        server_name  _;
+
+        location / {
+                proxy_pass http://myweb;
+        }
+
+}
+}
+
+
+
+DNS
+192.168.0.151  news  sport
+
+
+upstream myweb {
+        server 192.168.0.152:80;
+
+        server 192.168.0.155:80;
+        server 192.168.0.152:80;
+        server 192.168.0.153:80;
+    default_type        application/octet-stream;
+
+upstream myweb1 {
+        server 192.168.0.152:80;
+        server 192.168.0.153:80;
+}
+upstream myweb2 {
+        server 192.168.0.155:80;
+}
+
+    server {
+        listen       80;
+        server_name  news.example.com;
+
+        location / {
+                proxy_pass http://myweb1;
+        }
+}
+    server {
+        listen       80;
+        server_name  sport.example.com;
+
+        location / {
+                proxy_pass http://myweb2;
+
+
+
+
+
+
+
+

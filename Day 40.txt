@@ -1,0 +1,365 @@
+发现：存在 ping 
+     zabbix agent
+	 
+动作：添加主机（描述 群组 IP port  模板）	 
+
+
+自动发现 存在 ping 
+     zabbix agent
+	 
+动作	（关联到自动发现） 
+			
+			
+			
+			
+报警
+主机 关联了相关模板 Zabbix 使用改模板的预制测试条件
+  例如192.168.0.221 仅实施MySQL  应该关联MySQL模板 Template DB MySQL
+								用同时关联Template App Http Service
+								
+报警观察
+1.仪表板 Global view
+2.Email
+3.SMS
+4.其他程序
+
+
+https://oapi.dingtalk.com/robot/send?access_token=726ee44e56cdde0119a2e83eb3f853671d1d8c391b0156da4e6a9240d12cf2ca
+
+
+curl 'https://oapi.dingtalk.com/robot/send?access_token=726ee44e56cdde0119a2e83eb3f853671d1d8c391b0156da4e6a9240d12cf2ca' \
+   -H 'Content-Type: application/json' \
+   -d '{"msgtype": "text", 
+        "text": {
+             "content": "服务器报警测试 这是测试 不用慌"
+        }
+      }'
+	  
+	  
+	  
+<?php  
+function request_by_curl($remote_server, $post_string) {  
+    $ch = curl_init();  
+    curl_setopt($ch, CURLOPT_URL, $remote_server);
+    curl_setopt($ch, CURLOPT_POST, 1); 
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); 
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json;charset=utf-8'));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);  
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    // 线下环境不用开启curl证书验证, 未调通情况可尝试添加该代码
+    // curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0); 
+    // curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    $data = curl_exec($ch);
+    curl_close($ch);                
+    return $data;  
+}  
+
+$webhook = "https://oapi.dingtalk.com/robot/send?access_token=xxxxxx";
+$message="我就是我, 是不一样的烟火";
+$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+$data_string = json_encode($data);
+
+$result = request_by_curl($webhook, $data_string);  
+echo $result;
+?>
+
+
+{
+    "msgtype": "text", 
+    "text": {
+        "content": "我就是我, 是不一样的烟火@156xxxx8827"
+    }, 
+    "at": {
+        "atMobiles": [
+            "156xxxx8827", 
+            "189xxxx8325"
+        ], 
+        "isAtAll": false
+    }
+}
+
+
+https://www.zabbix.com/forms/template_building_services_TempDevForm
+
+
+	  
+
+
+
+
+https://www.python.org/ftp/python/3.7.4/python-3.7.4-amd64.exe
+
+Python
+CPython
+JPython
+PPython
+解释执行
+1 2.x 3.x
+
+2.7
+3.3----3.7
+>>> print('hello world')
+
+计算
+整数和整数 整数
+整数和浮点 浮点
+除法 浮点 
+>>> 1+2+4+7-100
+-86
+>>> 1+2+4+7-100*2
+-186
+>>> 1+2+4+7-100*2/4
+-36.0
+
+>>> 2.0+3.4
+5.4
+
+负数
+除以0
+
+>>> 10/0
+Traceback (most recent call last):
+  File "<pyshell#25>", line 1, in <module>
+    10/0
+ZeroDivisionError: division by zero
+
+商 余
+>>> 21//5
+4
+>>> 21%5
+1
+7%(5//2)
+
+
+字符串
+单引号 双引号
+
+a
+b
+c
+d
+
+print ('a\nb\nc\nd')
+>>> print ('a\nb\nc\nd')
+a
+b
+c
+d
+>>> """a
+b
+c
+d"""
+'a\nb\nc\nd'
+>>> print('a\nb\nc\nd')
+a
+b
+c
+d
+
+
+输入输出
+输出 函数 print
+>>> print ( "A\tB")
+A	B
+>>> print ( "A\nB")
+A
+B
+>>> print ( "AB")
+AB
+>>> print ( 'AB')
+AB
+>>> print ('print ("print")')
+print ("print")
+>>> 'print'
+'print'
+
+输入 函数 input
+
+整数 + - * / // %
+
+字符串 + *
+ >>> print ('aa'+'bb')
+aabb
+>>> print ('aa'+"bb")
+aabb
+>>> print ('aa'*3)
+aaaaaa
+
+
+"one"+"2"
+'one'+"20"
+'1'+2
+2+3
+a+c
+
+类型转换
+int
+float
+str
+>>> print(int("12")*int("2"))
+24
+>>> print(str(30)+"s")
+30s
+>>> print(30+20)
+50
+>>> print(float(30+20))
+50.0
+
+>>> 1+2
+3
+>>> "1"+"2"
+'12'
+>>> input ('PLS input first Str: ')+input ('PLS input second Str: ')
+PLS input first Str: 1
+PLS input second Str: 2
+'12'
+>>> int(input ('PLS input first Num: '))+int(input ('PLS input second Num: '))
+PLS input first Num: 1
+PLS input second Num: 2
+3
+
+>>> v1=1
+>>> v2 = 2
+>>> v3 = "A"
+>>> v4 ='B'
+>>> print(v1)
+1
+>>> print(v4)
+B
+字母（大小写）数字 下划线 不能数字
+>>> print(v5)
+Traceback (most recent call last):
+  File "<pyshell#119>", line 1, in <module>
+    print(v5)
+NameError: name 'v5' is not defined
+
+>>> print(v4)
+B
+>>> del v4
+>>> print(v4)
+Traceback (most recent call last):
+  File "<pyshell#126>", line 1, in <module>
+    print(v4)
+NameError: name 'v4' is not defined
+
+>>> x+=1
+>>> print(x)
+6
+>>> x-=1
+>>> print(x)
+5
+>>> x*=2
+>>> print(x)
+10
+>>> print(x)
+10
+>>> x/=5
+>>> print(x)
+2.0
+>>> x=21
+>>> x//=5
+>>> print(x)
+4
+>>> x=21
+>>> x%=5
+>>> print(x)
+1
+
+x+=y    x=x+y
+
+>>> x='hello'
+>>> y=' '
+>>> z='world'
+>>> print (x+y+z)
+hello world
+>>> w='ABC'
+>>> print(w*3)
+ABCABCABC
+>>> w*=2
+>>> print(w)
+ABCABC
+>>> (x+=y)+=z
+SyntaxError: invalid syntax
+>>> x+=y
+>>> print(x)
+hello 
+>>> x+=z
+>>> print(x)
+hello world
+
+
+
+echo "# PythonTest" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/JinlingTest/PythonTest.git
+git push -u origin master
+
+
+v1=input('PLS Input a NUm: ')
+if int(v1)==10:
+    print("等于10")
+elif int(v1)==20:
+    print("等于20")
+elif int(v1)==30:
+    print("等于30")
+else:
+    print("不等于10 20 30 ")
+	
+真假   True False	
+与或非 	and or not
+
+	
+not
+and
+or	
+
+>>> False or False and True
+False
+>>> False or True and True
+True
+>>> False and True or True
+True
+>>> False and True and True
+False
+>>> not False and True and True
+True
+
+
+循环
+while循环
+
+while expression:
+  statement1
+  statement2
+  ...
+
+
+v1=int(input('PLS input a NUM: '))
+while v1>=1:
+    print('hello'+str(v1))
+    v1-=1
+
+
+break 跳出循环
+continue 循环体中下面语句不执行 执行下次
+v1=0
+while True:
+    v1=v1+1
+    if v1==10:
+        break
+    if (v1%2)==0:
+        continue
+    print(v1)x
+https://github.com/JinlingTest/PythonTest.git
+
+
+
+
+
+
+
+
+
+								

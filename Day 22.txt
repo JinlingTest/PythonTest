@@ -1,0 +1,135 @@
+Oracle Database Architecture
+S=I+Database
+Instance=Memory+Process
+Database=Storage
+
+Memory structure=PGA(堆栈 用户数据)+SGA(...)
+SGA =Database Buffer Cache   （DB_CACHE_SIZE）
+	+Shared Pool(保留计划 重复利用)
+	+Large Pool(imp  exp  backup ......)
+	+Java Pool(JVM)
+	+Streams Pool(支持高级复制功能)
+	+Redo Log Buffer 重做日志缓存======〉重做日志文件
+	
+	
+可靠
+数据(结果)+   重做日志(过程)
+
+Process	=Background process+Server process
+		
+SMON ..crash merge
+PMON ..回收资源，监控进程
+DBWn ..数据库写 (dirty)脏 灰  clean 干净
+LGWR ..日志写 
+CKPT ..检查点进程 保证数据和日志写入同步
+
+存放在磁盘的文件
+参数文件 /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora
+控制文件 select name from v$controlfile;
+数据文件 select file_name from dba_data_files;
+临时select file_name from dba_temp_files;
+重做日志 select member from v$logfile;
+口令文件 $ORACLE_HOME/dbs/orapworcl
+预警日志文件/u01/app/oracle/diag/rdbms/orcl/orcl/trace/alert_orcl.log
+
+
+select tablespace_name,file_name from dba_data_files
+union
+select tablespace_name,file_name from dba_temp_files;
+
+select owner,table_name,tablespace_name from dba_tables where table_name IN ('TEST1','TEST2');
+select tablespace_name,segment_name from dba_segments where segment_name IN ('TEST1','TEST2');
+
+drop table test1;
+drop table test2;
+create table test1 as select * from dba_objects;
+create table test2 tablespace users as select * from dba_objects where rownum<10000;
+select count(*) from test2 ;
+select count(*) from test1 ;
+
+select t.owner,t.table_name,t.tablespace_name,
+s.segment_name,s.extents,s.blocks,s.bytes
+from dba_tables t JOIN dba_segments s ON t.table_name=s.segment_name
+where table_name IN ('TEST1','TEST2');
+
+select tablespace_name from dba_tablespaces;
+
+
+
+存储结构
+逻辑结构				物理
+Database
+Tablespace				Datafile
+Segment
+Extent
+block
+
+Managing the Database Instance
+
+Initialization Parameter Files
+参数文件 /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora
+CONTROL_FILES=
+Database Reference
+[oracle@db1 ~]$ ps -ef|grep ora_|grep -v 'grep'|wc -l
+48
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i process
+*.processes=300
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i PGA_AGGREGATE_TARGET
+orcl.__pga_aggregate_target=671088640
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i SHARED_POOL_SIZE
+orcl.__shared_pool_size=218103808
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i UNDO_MANAGEMENT
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i CONTROL_FILES
+*.control_files='/u01/app/oracle/oradata/orcl/control01.ctl','/u01/app/oracle/oradata/orcl/control02.ctl'
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i DB_FILES
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i DB_BLOCK_SIZE
+*.db_block_size=8192
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i DB_CACHE_SIZE
+orcl.__db_cache_size=654311424
+[oracle@db1 ~]$ 
+
+
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i DB_CACHE_SIZE
+orcl.__db_cache_size=654311424
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i SHARED_POOL_SIZE
+orcl.__shared_pool_size=218103808
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i JAVA_POOL_SIZE
+orcl.__java_pool_size=16777216
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i LARGE_POOL_SIZE
+orcl.__large_pool_size=33554432
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i STRAEMS_POOL_SIZE
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i STREAMS_POOL_SIZE
+orcl.__streams_pool_size=0
+[oracle@db1 ~]$ strings /u01/app/oracle/product/12.2.0/dbhome_1/dbs/spfileorcl.ora |grep -i LOG_BUFFER
+[oracle@db1 ~]$ 
+
+
+
+启动 startup
+关闭 
+
+shutdown normal			connection is not permitted  等到所有用户断开
+shutdown transactional	connection is not permitted  主动断开用户(所有用户事务结束后)
+shutdown immediate		connection is not permitted  主动断开用户(回滚用户事务)
+----------------------
+shutdown abort      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

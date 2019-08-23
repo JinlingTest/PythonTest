@@ -1,0 +1,367 @@
+color
+
+echo ""
+echo -e ""
+echo -e "\e[底色;字符色m ABCDEFG "
+echo -e "\e[底色;字符色m ABCDEFG \e[0m"
+echo -e "\e[底色;字符色mABCDEFG\e[0m"
+echo -e "\033[底色;字符色m ABCDEFG \033[0m"
+
+\e[底色;字符色m
+\033[底色;字符色m
+
+4底色 40-47
+44 蓝底
+3字符色 30-37
+31 红字
+echo -e "\033[44;31mABCDEFG"
+echo -e "\033[44;31mABCDEFG\033[0m"
+
+
+重置
+\e[0m
+\033[0m
+
+cut
+-d 分隔符 默认TAB
+-f 字段
+
+-c 字符
+-b 字节
+
+  877  cut -d : -f 1 /etc/passwd
+  878  cut -c1-4 /etc/passwd
+  879  cut -c-5 /etc/passwd
+  880  cut -c3-5 /etc/passwd
+  881  cut -c20- /etc/passwd
+
+
+
+regex
+(Regular Expression)
+用来 查找 替换 符合某个模式
+用在命令grep sed awk
+基础 Basic RE
+扩展 Extent RE
+^ 开始
+$ 结束
+\ 转义符 
+* 0~n
++ 1~n
+. 1
+? 0~1
+() 标记一个表达式开始和结束
+[] 标记一个表达式开始和结束
+{   限定符
+|   二选一
+
+\n
+\r
+\t
+
+
+sed stream editor 流编辑器
+一行一行的处理文本文件的内容
+处理时：
+	1.将一行放置在模式空间(缓冲区) 
+	2.处理 完成后输出(标准输出)
+	3.如果需要修改文件 指定 -i选项
+
+# sed -n '4p' /etc/sysconfig/selinux
+# sed [-选项] '[命令集]' 文本文件
+
+[-选项]
+n 
+a 当前行后面插入文件
+f 脚本
+i 修改本文件	
+	
+[命令]
+p print
+d 删除
+s 替换
+i 插入
+a 追加
+w 写新文件（另存 ）
+c 替换整行
+
+sed '/^SELINUX/s/enforcing/disabled/g' selinux 
+# sed '7s/enforcing/disabled/g' selinux
+# sed '4,7s/enforcing/disabled/g' selinux
+sed '7,$s/enforcing/disabled/g' selinux
+
+# sed -n '4,7p' selinux 
+# sed '7,10d' selinux 
+[root@s55 ~]# cat /etc/hosts                         
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.0.11 s11
+192.168.0.12 s12
+192.168.0.14 s14
+[root@s55 ~]# sed '/s12/a\192.168.0.13 s13' /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.0.11 s11
+192.168.0.12 s12
+192.168.0.13 s13
+192.168.0.14 s14
+[root@s55 ~]# sed '/s14/i\192.168.0.13 s13' /etc/hosts  
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.0.11 s11
+192.168.0.12 s12
+192.168.0.13 s13
+192.168.0.14 s14
+# sed -i '4a\192.168.0.16 s16' /etc/hosts
+
+deploy.sh 56 
+
+1.主机名 
+hostnamectl set-hostname s56.example.com
+2.ip    
+/etc/sysconfig/network-scripts/ifcfg-ens33 
+UUID=0baaed30-02e2-4981-a6ac-a63b1d889666
+IPADDR=192.168.0.56
+GATEWAY=192.168.0.2
+DNS1=8.8.8.8
+systemctl restart network
+3.selinux
+SELINUX=disabled
+
+setenforce 0
+
+4.firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+
+5.hosts
+添加
+192.168.0.56 s56.example.com
+
+
+
+
+[root@s55 ~]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.0.13 s13
+192.168.0.14 s14
+192.168.0.15 s15
+192.168.0.16 s16
+192.168.0.17 s17
+[root@s55 ~]# sed -i '/^192/w host.dat' /etc/hosts      在hosts文件中找192开头的行 将内容另存为文件hosts.dat文件               
+[root@s55 ~]# cat host.dat 
+192.168.0.13 s13
+192.168.0.14 s14
+192.168.0.15 s15
+192.168.0.16 s16
+192.168.0.17 s17
+
+
+AWK的使用
+grep 查找和过滤文本
+sed 编辑文本
+awk 格式化文本输出
+
+
+AWK语法
+awk [选项] '模块' 文件名
+awk [选项] 'BGIN模块(comm) 工作模块  END模块(comm)' 文件名
+
+工作模块    /pattern/命令
+
+pattern
+	RE /^SELINUX/
+	关系  >  <   && ||
+	
+命令
+	:shell command
+	 variables： 内置变量  自定义变量
+	 内置function
+	 流控 ?:
+
+一行一行的处理文本文件的内容
+
+内置变量  $1....$9  ${10}     $n
+          $0 整行的数据
+		  FILENAME
+		  FS 分隔符 默认空格
+		  NF  字段个数
+		  NR  行数
+		  
+		  $NF
+		  
+ 961  ps -ef h > awk01.dat
+  962  cat awk01.dat
+  963  awk '{print $3}' awk01.dat
+  964  echo "A B C D" |awk '{print $3}'
+  965  echo "A B C D" |awk '{print $NF}'
+  966  echo "A B C D" |awk '{print $0}'
+  967  echo "A:B:C:D" |awk '{print $0}'
+  968  echo "A:B:C:D" |awk '{print $2}'
+  970  echo "A:B:C:D" |awk '{print $NF}'
+  971  echo "A:B:C:D" |awk '{print $3}'
+  972  echo "A:B:C:D" |awk -F: '{print $3}'
+  974  echo "A:B:C:D" |awk 'BEGIN{FS=":"}{print $3}'		  
+		  
+		  
+awk [选项] '模块' 文件名
+[选项]		  
+-F 指定分隔符 功能等同内置变量FS
+-v 指定自定义变量
+-f 指定文件名 含有awk命令		  
+
+# echo "A:B.C:D" |awk 'BEGIN{FS="[:.]"}{print $2}'		  
+# echo "ABCDAEFGAHJ" |awk 'BEGIN{FS="A"}{print $2}'		  
+# echo "ABaCDAEaFGAaHaJ" |awk 'BEGIN{FS="[Aa]"}{print $2}'		  
+echo "ABaCDAEaFGAaHaJ" |awk 'BEGIN{FS="Aa"}{print $1}'		  
+
+grep 'temporary password' /var/log/mysqld.log
+grep 'temporary password' /var/log/mysqld.log |awk '{print $NF}'
+mysql -uroot -p`grep 'temporary password' /var/log/mysqld.log |awk '{print $NF}'`
+
+ ip a s ens33|grep 'scope global'|awk '{print $2}'|awk 'BEGIN{FS="/"}{print $1}'
+ip a s ens33|grep 'scope global'|awk 'BEGIN{FS="[sd]"}{print $2}'
+
+awk 运算
+[root@s55 ~]# echo "100 200 300"|awk '{print $2}'
+200
+[root@s55 ~]# echo "100 200 300"|awk '{print $2*3}'
+600
+[root@s55 ~]# echo "100 200 300"|awk '{print $2*$3}'
+60000
+[root@s55 ~]# echo "100 200 300"|awk '{print $3*$1}'
+30000
+[root@s55 ~]# echo "100 200 300"|awk '{print $3/$1}'
+
+找出使用bash的普通用户
+工作模块    /pattern/命令
+
+pattern
+	RE /^SELINUX/
+	关系  >  <   && ||
+	 1037  awk 'BEGIN{FS=":"}{print $1"\t"$NF}' /etc/passwd
+# awk 'BEGIN{FS=":"} $3>=1000&&$3<65000{print "用户"$1"的shell是："$NF}' /etc/passwd 
+awk 'BEGIN{FS=":"} $3>=1000&&$3<65000&&$NF=="/bin/bash"{print $1"\t"$NF}' /etc/passwd
+
+内存 还剩百分比
+[root@s55 ~]# free|awk '/^Mem/{print "该机的总内存为："$2/1024/1024" GiB";print "目前剩余内存占 比："$4/$2*100"%"}'         
+该机的总内存为：1.93778 GiB
+目前剩余内存占比：4.08994%
+
+awk [选项] 'BGIN模块(comm) 工作模块  END模块(comm)' 文件名
+
+#!/usr/bin/bash
+#
+#
+for i in  `awk '/^192/{print $1}' /etc/hosts`
+do
+ping -c1 ${i} &> /dev/null
+if [ $? -eq 0 ];then
+echo "${i} online"
+else
+echo "${i} offline "
+fi
+done
+
+[root@s55 ~]# uuidgen ens33:0
+472dc818-4392-4c77-b981-d5b455d24d0a
+[root@s55 ~]# uuidgen ens33:1
+527374c8-0ca3-4c59-99e2-60228fde2f36
+
+
+/etc/sysconfig/network-scripts/ifcfg-ens33:0 
+NAME=ens33:0
+UUID=472dc818-4392-4c77-b981-d5b455d24d0a
+DEVICE=ens33:0
+IPADDR=192.168.0.13
+
+ifup ens33:0
+
+[root@s55 network-scripts]# ip route|awk 'NR==1{print $0}'  
+default via 192.168.0.2 dev ens33 
+[root@s55 network-scripts]# ip route|awk 'NR==1{print $3}' 
+
+
+显示用户的名字和shell
+awk 'BEGIN{FS=":"}{print $1"\t"$NF}' /etc/passwd
+显示用户名 并描述该用户是否可以登录
+awk 'BEGIN{FS=":"}{$NF=="/sbin/nologin"?print $1"该用户不可以登录":print $1"该用户可以登录"}' /etc/passwd
+
+awk 'BEGIN{FS=":"}{$NF=="/sbin/nologin"||$NF=="/bin/false"?V1="不可以":V1="可以";print $1"该户"V1"登录"}' /etc/passwd
+
+# awk 'BEGIN{FS=":"}{if($NF=="/sbin/nologin"){print $1"该户"V1"不可以 登录"}else{print $1"该户"V1"可以 登录"}}' /etc/passwd
+
+awk 'BEGIN{FS=":"}{if($NF=="/sbin/nologin"||$NF=="/bin/false"){print $1"该户不可以登录"}else{print $1"该户可以登录"}}' /etc/passwd
+
+
+在awk使用在awk中定义的变量 不用$
+
+[root@s55 network-scripts]# v2=1000
+[root@s55 network-scripts]# awk 'BEGIN{print '$v2'}'
+1000
+
+printf 
+f=FORMAT
+
+ 1061  awk 'BEGIN{FS=":"}{printf "%12s\n",$1}' /etc/passwd
+ 1062  awk 'BEGIN{FS=":"}{printf "%-12s\n",$1}' /etc/passwd
+
+bash -v 脚本名字   检测
+bash -x 脚本名字   步进执行
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+

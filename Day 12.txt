@@ -1,0 +1,91 @@
+# yum -y install qemu-kvm libvirt libguestfs-tools virt-install virt-manager libvirt-python
+
+[root@centos1 ~]# ls -l /var/lib/libvirt/images/
+总用量 23293192
+-rw------- 1 qemu qemu 9665380352 7月   5 14:01 centos7.0-2.qcow2
+-rw------- 1 root root 9665380352 7月   5 14:01 centos7.0.qcow2
+-rw-r--r-- 1 qemu qemu 4521459712 1月   6 10:48 CentOS-7.4-x86_64-DVD-1708.iso
+[root@centos1 ~]# virt-clone -o centos7.0 -n centos7.0-3 -f /var/lib/libvirt/images/centos7.0-3.qcow2
+正在分配 'centos7.0-3.qcow2'                                  | 9.0 GB  00:00:08     
+
+成功克隆 'centos7.0-3'。
+  108  ls -l /var/lib/libvirt/images/
+  109  virsh list --all
+  110  virsh start centos7.0-3
+  111  virsh list --all
+  112  history 
+  113  virsh list --all
+  114  virsh snapshot-list centos7.0
+  115  virsh snapshot-create centos7.0
+  116  virsh snapshot-list centos7.0
+  117  virsh snapshot-create-as centos7.0 snapshot4
+  118  virsh snapshot-list centos7.0
+  119  history |tail -10
+  120  history |tail -13
+  121  history |tail -16
+  122  virsh snapshot-list centos7.0
+  123  virsh snapshot-revert centos7.0 snapshot2
+  124  virsh snapshot-delete centos7.0 snapshot1
+  125  history |tail -19
+  126  ls /etc/libvirt/qemu
+  127  virsh list --all
+  127  virsh list --all
+  128  virsh suspend centos7.0
+  129  virsh list --all
+  130  virsh resume centos7.0
+  131  virsh autostart centos7.0
+  132  virsh console centos7.0
+  133  history 
+  134  virsh list -all
+  135  virsh list --all
+  136  virsh undefine centos7.0-2
+  137  virsh list --all
+  138  ls /var/lib/libvirt/images/
+  139  ls /etc/libvirt/qemu
+  140  history 
+  
+  
+  rw init=/sysroot/bin/sh 
+  ctrl+x
+  
+  
+  
+  
+  正则表达式  grep sed awk
+  grep 查找内容
+  ^
+  $
+  [abc]
+  
+  -i
+  -v
+  -A num
+  -B num
+  -e
+  193  grep ^# pet.txt
+  194  grep ^$ pet.txt
+  195  grep ^; pet.txt
+  196  grep '^;' pet.txt
+  197  grep '^;' '^#' pet.txt
+  198  grep -e '^;' -e '^#' pet.txt
+  199  grep '^[;#]' pet.txt
+  200  grep '^[;#$]' pet.txt
+  201  grep -e '^[;#]' -e '^$' pet.txt
+  
+ [root@centos1 ~]# grep '^Jul *5 16:[45][0123456789].*限不够' /var/log/messages
+Jul  5 16:41:14 centos1 journal: unable to create file '/run/user/0/dconf/user': 权限不够.  dconf will not work properly.
+Jul  5 16:42:45 centos1 journal: unable to create file '/run/user/0/dconf/user': 权限不够.  dconf will not work properly.
+Jul  5 16:51:51 centos1 journal: unable to create file '/run/user/0/dconf/user': 权限不够.  dconf will not work properly.
+Jul  5 16:52:17 centos1 journal: unable to create file '/run/user/0/dconf/user': 权限不够.  dconf will not work properly.
+[root@centos1 ~]#  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

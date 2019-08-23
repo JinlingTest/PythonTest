@@ -1,0 +1,582 @@
+
+启动 startup
+关闭 
+
+shutdown normal			connection is not permitted  等到所有用户断开
+shutdown transactional	connection is not permitted  主动断开用户(所有用户事务结束后)
+shutdown immediate		connection is not permitted  主动断开用户(回滚用户事务)
+执行检查点操作----数据库处于一致性(数据\日志\控制文件 同步)
+
+SQL> shutdown ......
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+----------------------
+shutdown abort  关闭时不执行强制检查点 数据库处于不一致性
+SQL> shutdown abort
+ORACLE instance shut down.
+
+启动 startup
+SQL> startup
+参数文件 ORACLE instance started.
+控制文件 Database mounted.
+数据 + 日志  Database opened.
+
+
+基表---视图
+Dynamic Performance Views
+Provide access to information about changing states of the instance memory structures
+
+SELECT sql_text, executions FROM v$sql
+WHERE cpu_time > 200000;
+SELECT * FROM v$session
+WHERE machine = 'EDXX9P1'
+AND logon_time > SYSDATE - 1;
+SELECT sid, ctime FROM v$lock
+WHERE block > 0;
+
+
+Data Dictionary table
+Data Dictionary Views
+
+user_tables
+all_tables
+dba_tables
+
+user_constraints
+
+user_indexes
+all_indexes
+dba_indexes
+
+SQL> col table_name for a20
+SQL> col tablespace_name for a15
+SQL> SELECT table_name, tablespace_name
+  2  FROM user_tables;
+  
+  
+  SELECT USERNAME, ACCOUNT_STATUS
+FROM dba_users
+WHERE ACCOUNT_STATUS = 'OPEN';
+
+
+
+oracle Client
+$ORACLE_HOME/network/admin/tnsnames.ora
+
+服务器端监听器 listener.ora
+netmgr
+(地址 协议 端口 服务名)
+
+客户端
+(地址 协议 端口 服务名)
+简易连接 $ sqlplus hr/hr@192.168.0.122:1521/orcl
+TNS连接  tnsnames.ora
+
+SQL> alter system set shared_servers=50;
+SQL> alter system set dispatchers='(protocol=tcp)(dispatchers=1)';
+
+REMOTE_ORCL =
+(DESCRIPTION =
+(ADDRESS = (PROTOCOL = TCP)
+(HOST = host02.example.com)
+(PORT = 1521))
+(CONNECT_DATA =
+(SERVER = DEDICATED)
+(SERVICE_NAME = orcl2.example.com)
+)
+)
+
+CONNECT hr/hr@orcl1;
+CREATE DATABASE LINK remote
+CONNECT TO HR IDENTIFIED BY HR
+USING 'REMOTE_ORCL';
+SELECT * FROM employees@remote
+
+
+account
+sys
+system
+sysbackup
+sysdg
+syskm
+
+privileges
+sysdba
+system
+sysbackup
+sysdg
+syskm
+
+SQL> create user hrdba identified by "123456" profile DEFAULT
+  2  default tablespace USERS temporary tablespace TEMP;
+  
+
+两类 privileges
+system privileges 
+object privileges 
+  
+
+DBA_SYS_PRIVS
+SQL> select privilege from dba_sys_privs where grantee='SYS';
+
+PRIVILEGE
+----------------------------------------
+CREATE HIERARCHY
+SELECT ANY MEASURE FOLDER
+INHERIT ANY PRIVILEGES
+FLASHBACK ARCHIVE ADMINISTER
+EM EXPRESS CONNECT
+UPDATE ANY CUBE BUILD PROCESS
+CREATE ANY CUBE DIMENSION
+ALTER ANY CUBE DIMENSION
+DROP ANY EDITION
+ADMINISTER ANY SQL TUNING SET
+SELECT ANY TRANSACTION
+
+PRIVILEGE
+----------------------------------------
+CREATE JOB
+DROP ANY RULE SET
+ALTER ANY RULE SET
+GRANT ANY OBJECT PRIVILEGE
+MERGE ANY VIEW
+DROP ANY DIMENSION
+ALTER ANY OPERATOR
+EXECUTE ANY LIBRARY
+CREATE ANY LIBRARY
+DROP ANY DIRECTORY
+DROP ANY MATERIALIZED VIEW
+
+PRIVILEGE
+----------------------------------------
+CREATE MATERIALIZED VIEW
+DROP PROFILE
+DROP ANY PROCEDURE
+DROP PUBLIC DATABASE LINK
+DROP ANY CLUSTER
+ALTER ANY CLUSTER
+ALTER ANY TABLE
+CREATE TABLE
+UNLIMITED TABLESPACE
+AUDIT SYSTEM
+ALTER ANY ANALYTIC VIEW
+
+PRIVILEGE
+----------------------------------------
+ALTER ANY HIERARCHY
+DROP ANY ATTRIBUTE DIMENSION
+ALTER ANY ATTRIBUTE DIMENSION
+EXEMPT DDL REDACTION POLICY
+USE ANY JOB RESOURCE
+ALTER ANY SQL TRANSLATION PROFILE
+UPDATE ANY CUBE DIMENSION
+CREATE ANY CUBE BUILD PROCESS
+SELECT ANY CUBE
+CREATE ANY CUBE
+CREATE CUBE DIMENSION
+
+PRIVILEGE
+----------------------------------------
+EXECUTE ASSEMBLY
+ALTER ANY ASSEMBLY
+CREATE ANY ASSEMBLY
+CREATE ASSEMBLY
+ADMINISTER SQL TUNING SET
+EXECUTE ANY CLASS
+ALTER ANY RULE
+CREATE ANY RULE
+IMPORT FULL DATABASE
+RESUMABLE
+ON COMMIT REFRESH
+
+PRIVILEGE
+----------------------------------------
+UNDER ANY TABLE
+GLOBAL QUERY REWRITE
+CREATE LIBRARY
+ALTER ANY TYPE
+ALTER ANY MATERIALIZED VIEW
+ALTER PROFILE
+EXECUTE ANY PROCEDURE
+CREATE ANY CLUSTER
+DROP ROLLBACK SEGMENT
+BECOME USER
+DROP TABLESPACE
+
+PRIVILEGE
+----------------------------------------
+ALTER SESSION
+CREATE ANALYTIC VIEW
+DROP ANY HIERARCHY
+CREATE ANY HIERARCHY
+ALTER ANY MEASURE FOLDER
+CREATE CREDENTIAL
+CREATE SQL TRANSLATION PROFILE
+CREATE CUBE BUILD PROCESS
+DROP ANY CUBE DIMENSION
+DROP ANY ASSEMBLY
+EXECUTE ANY RULE
+
+PRIVILEGE
+----------------------------------------
+CREATE RULE SET
+CREATE ANY EVALUATION CONTEXT
+DROP ANY OPERATOR
+CREATE ANY OPERATOR
+CREATE OPERATOR
+ANALYZE ANY
+ALTER ANY PROCEDURE
+FORCE TRANSACTION
+ALTER ANY ROLE
+CREATE ANY SEQUENCE
+CREATE VIEW
+
+PRIVILEGE
+----------------------------------------
+COMMENT ANY TABLE
+ALTER ROLLBACK SEGMENT
+CREATE ANY CREDENTIAL
+USE ANY SQL TRANSLATION PROFILE
+ADMINISTER SQL MANAGEMENT OBJECT
+DROP ANY CUBE BUILD PROCESS
+UPDATE ANY CUBE
+DROP ANY CUBE
+SELECT ANY CUBE DIMENSION
+DELETE ANY CUBE DIMENSION
+COMMENT ANY MINING MODEL
+
+PRIVILEGE
+----------------------------------------
+CREATE ANY MINING MODEL
+CREATE ANY SQL PROFILE
+ALTER ANY SQL PROFILE
+DROP ANY SQL PROFILE
+EXECUTE ANY PROGRAM
+CREATE ANY JOB
+CREATE ANY RULE SET
+EXECUTE ANY EVALUATION CONTEXT
+QUERY REWRITE
+CREATE TYPE
+ALTER ANY TRIGGER
+
+PRIVILEGE
+----------------------------------------
+AUDIT ANY
+CREATE ROLE
+ALTER ANY SEQUENCE
+DROP ANY SYNONYM
+CREATE SYNONYM
+DROP ANY INDEX
+ALTER ANY INDEX
+ALTER USER
+MANAGE TABLESPACE
+CREATE ANY ANALYTIC VIEW
+READ ANY TABLE
+
+PRIVILEGE
+----------------------------------------
+SELECT ANY CUBE BUILD PROCESS
+LOGMINING
+SET CONTAINER
+DROP ANY MEASURE FOLDER
+CREATE ANY MEASURE FOLDER
+ALTER ANY CUBE
+DROP ANY MINING MODEL
+CHANGE NOTIFICATION
+FLASHBACK ANY TABLE
+DEBUG CONNECT SESSION
+CREATE ANY OUTLINE
+
+PRIVILEGE
+----------------------------------------
+MANAGE ANY QUEUE
+EXECUTE ANY INDEXTYPE
+UNDER ANY VIEW
+ALTER ANY INDEXTYPE
+EXECUTE ANY OPERATOR
+UNDER ANY TYPE
+DROP ANY TRIGGER
+DROP ANY SEQUENCE
+CREATE CLUSTER
+REDEFINE ANY TABLE
+DELETE ANY TABLE
+
+PRIVILEGE
+----------------------------------------
+UPDATE ANY TABLE
+INSERT ANY TABLE
+DROP ANY TABLE
+BACKUP ANY TABLE
+CREATE ANY TABLE
+CREATE ATTRIBUTE DIMENSION
+DROP ANY SQL TRANSLATION PROFILE
+CREATE ANY SQL TRANSLATION PROFILE
+DELETE ANY MEASURE FOLDER
+INSERT ANY CUBE DIMENSION
+ALTER ANY MINING MODEL
+
+PRIVILEGE
+----------------------------------------
+CREATE MINING MODEL
+READ ANY FILE GROUP
+MANAGE ANY FILE GROUP
+ADVISOR
+DROP ANY RULE
+DEBUG CONNECT ANY
+ADMINISTER RESOURCE MANAGER
+CREATE ANY DIMENSION
+CREATE DIMENSION
+DROP ANY INDEXTYPE
+DROP ANY LIBRARY
+
+PRIVILEGE
+----------------------------------------
+ALTER ANY LIBRARY
+EXECUTE ANY TYPE
+DROP ANY TYPE
+CREATE ANY DIRECTORY
+GRANT ANY PRIVILEGE
+ALTER RESOURCE COST
+CREATE PROFILE
+CREATE ANY PROCEDURE
+FORCE ANY TRANSACTION
+SELECT ANY SEQUENCE
+CREATE ANY SYNONYM
+
+PRIVILEGE
+----------------------------------------
+LOCK ANY TABLE
+CREATE ROLLBACK SEGMENT
+CREATE TABLESPACE
+ALTER SYSTEM
+DROP ANY ANALYTIC VIEW
+ALTER ANY CUBE BUILD PROCESS
+EXEMPT DML REDACTION POLICY
+DROP LOCKDOWN PROFILE
+CREATE PLUGGABLE DATABASE
+INSERT ANY MEASURE FOLDER
+CREATE MEASURE FOLDER
+
+PRIVILEGE
+----------------------------------------
+EXECUTE ANY ASSEMBLY
+CREATE ANY EDITION
+MANAGE FILE GROUP
+MANAGE SCHEDULER
+CREATE RULE
+EXECUTE ANY RULE SET
+DROP ANY EVALUATION CONTEXT
+CREATE EVALUATION CONTEXT
+DROP ANY CONTEXT
+ENQUEUE ANY QUEUE
+CREATE ANY TYPE
+
+PRIVILEGE
+----------------------------------------
+CREATE ANY TRIGGER
+CREATE TRIGGER
+ALTER DATABASE
+CREATE PUBLIC SYNONYM
+CREATE ANY INDEX
+SELECT ANY TABLE
+CREATE USER
+RESTRICTED SESSION
+CREATE SESSION
+CREATE ANY ATTRIBUTE DIMENSION
+ALTER LOCKDOWN PROFILE
+
+PRIVILEGE
+----------------------------------------
+CREATE LOCKDOWN PROFILE
+CREATE CUBE
+SELECT ANY MINING MODEL
+ALTER ANY EDITION
+CREATE EXTERNAL JOB
+EXPORT FULL DATABASE
+ALTER ANY EVALUATION CONTEXT
+DEBUG ANY PROCEDURE
+ADMINISTER DATABASE TRIGGER
+DROP ANY OUTLINE
+ALTER ANY OUTLINE
+
+PRIVILEGE
+----------------------------------------
+CREATE ANY CONTEXT
+DEQUEUE ANY QUEUE
+ALTER ANY DIMENSION
+CREATE ANY INDEXTYPE
+CREATE INDEXTYPE
+CREATE ANY MATERIALIZED VIEW
+CREATE PROCEDURE
+GRANT ANY ROLE
+DROP ANY ROLE
+CREATE PUBLIC DATABASE LINK
+CREATE DATABASE LINK
+
+PRIVILEGE
+----------------------------------------
+CREATE SEQUENCE
+DROP ANY VIEW
+CREATE ANY VIEW
+DROP PUBLIC SYNONYM
+DROP USER
+ALTER TABLESPACE
+
+SQL> select privilege from dba_sys_privs where grantee='RESOURCE';
+
+PRIVILEGE
+----------------------------------------
+CREATE TABLE
+CREATE OPERATOR
+CREATE TYPE
+CREATE CLUSTER
+CREATE TRIGGER
+CREATE INDEXTYPE
+CREATE PROCEDURE
+CREATE SEQUENCE
+
+8 rows selected.
+
+SQL> select privilege from dba_sys_privs where grantee='CONNECT';
+
+PRIVILEGE
+----------------------------------------
+SET CONTAINER
+CREATE SESSION
+
+ create user alice identified by "123456" profile DEFAULT default tablespace USERS temporary tablespace TEMP;
+ 
+create user bob identified by "123456" profile DEFAULT default tablespace USERS temporary tablespace TEMP;
+
+SQL> grant create session,create table to alice with admin option;
+SQL> grant create session,create table to bob ;
+SQL> revoke create session from alice;
+system privileges的撤销是不级联
+
+SQL> grant select,update,delete,insert on hr.employees to alice with grant option;
+SQL> revoke select,update,delete,insert on hr.employees from alice;
+
+object privileges的撤销是级联
+
+SQL> create role r001;
+
+Role created.
+
+SQL> grant create table to r001;
+
+Grant succeeded.
+
+SQL> grant select on hr.jobs to r001;
+
+Grant succeeded.
+
+SQL> grant r001 to alice;
+
+Grant succeeded.
+
+SQL> 
+
+
+CONNECT CREATE SESSION
+DBA     Most system privileges; several other roles. Do not grant to non-administrators.
+
+RESOURCE 
+CREATE CLUSTER, CREATE INDEXTYPE,
+CREATE OPERATOR, CREATE PROCEDURE,
+CREATE SEQUENCE, CREATE TABLE, CREATE
+TRIGGER, CREATE TYPE
+
+SCHEDULER_ADMIN 
+CREATE ANY JOB, CREATE EXTERNAL JOB,
+CREATE JOB, EXECUTE ANY CLASS, EXECUTE
+ANY PROGRAM, MANAGE SCHEDULER
+
+SELECT_CATALOG_ROLE 
+
+SELECT privileges on data dictionary objects
+
+配置文件 ---profile
+create profile pro1 limit 
+connect_time 10/1440
+idle_time 5/1440;
+
+CREATE PROFILE app_user LIMIT 
+   SESSIONS_PER_USER          3
+   CPU_PER_SESSION            UNLIMITED 
+   CPU_PER_CALL               3000 
+   CONNECT_TIME               5
+   IDLE_TIME   1   
+   LOGICAL_READS_PER_SESSION  DEFAULT 
+   LOGICAL_READS_PER_CALL     1000 
+   PRIVATE_SGA                15K
+   COMPOSITE_LIMIT            5000000; 
+
+alter profile app_user LIMIT SESSIONS_PER_USER 1;
+
+Note: RESOURCE_LIMIT must be set to TRUE before profiles can impose
+resource limitations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,273 @@
+Using Conversion Functions
+and Conditional Expressions
+TO_CHAR, TO_NUMBER, and TO_DATE
+
+Data type conversion
+1.Implicit data type conversion
+2.Explicit data type conversion
+
+select 100+200 from dual;
+select 'abc'||'xyz' from dual;
+
+select 'abc'+'xyz' from dual;
+select 100+'200' from dual;
+select 100+to_number('200') from dual;
+select '100'+'2A00' from dual;
+Using the TO_CHAR Function with Dates
+TO_CHAR(date[,'format_model'])
+The format model:
+• Must be enclosed within single quotation marks
+• Is case-sensitive
+• Can include any valid date format element
+yyyy MM DD HH24 MI SS  DAY MONTH ... ddspth
+• Has an fm element to remove padded blanks or suppress leading zeros
+• Is separated from the date value by a comma
+
+SELECT sysdate FROM dual;
+
+SELECT to_char(sysdate,'AM YYYY-MM-DD HH24:MI:SS YEAR year Year Day DY') FROM dual;
+SELECT to_char(sysdate,'AM YYYY-MM-DD "HSJDJJHJHasd" HH24:MI:SS') FROM dual;
+SELECT to_char(sysdate,'DDsp DDspth dd YYYY-MM-DD  HH24:MI:SS') FROM dual;
+SELECT to_char(sysdate,'fmDDsp DDspth dd YYYY-MM-DD  HH24:MI:SS') FROM dual;
+
+SELECT to_char(sysdate,'AM YYYY-MM-DD HH24:MI:SS YEAR year Year Day DY') FROM dual;
+SELECT to_char(sysdate,'fmAM YYYY-MM-DD HH24:MI:SS YEAR year Year Day DY') FROM dual;
+
+Using the TO_CHAR Function with Numbers
+TO_CHAR(number[, 'format_model'])
+
+
+
+select 1234.567 from dual;
+select to_char(1234.567) from dual;
+select to_char(1234.567,'9999.999') from dual;
+select to_char(1234.567,'9999.99') from dual;
+select to_char(1234.567,'$9999.9999') from dual;
+select to_char(1234.567,'L999999.9999') from dual;
+select to_char(1234.567,'99999.999') from dual;
+select to_char(1234.567,'999.999') from dual;
+select to_char(1234.567,'99,999.999') from dual;
+select to_char(1234.567,'000,000.000000') from dual;
+
+Using the TO_NUMBER and TO_DATE Functions
+TO_NUMBER(char[, 'format_model'])
+TO_DATE(char[, 'format_model'])
+
+
+SELECT last_name, TO_CHAR(hire_date, 'DD-Mon-YYYY')
+FROM employees
+WHERE hire_date < TO_DATE('01-Jan-90','DD-Mon-RR');
+
+
+General functions:
+General functions:
+– NVL
+
+NULL 和任何值计算结果为NULL
+SELECT last_name,salary,commission_pct,salary*(1+commission_pct)  FROM employees;
+– NVL2
+– NULLIF
+– COALESCE
+SELECT last_name, salary, NVL(commission_pct, 0),
+(salary*12) + (salary*12*NVL(commission_pct, 0)) AN_SAL
+FROM employees;
+
+SELECT first_name, LENGTH(first_name) "expr1",
+last_name, LENGTH(last_name) "expr2",
+NULLIF(LENGTH(first_name), LENGTH(last_name)) result
+FROM employees;
+
+SELECT last_name, salary, commission_pct,
+COALESCE((salary+(commission_pct*salary)), salary+2000)"New Salary"
+FROM employees;
+
+Conditional expressions:
+CASE
+– Searched CASE
+– DECODE
+
+CASE expr WHEN comparison_expr1 THEN return_expr1
+[WHEN comparison_expr2 THEN return_expr2
+WHEN comparison_exprn THEN return_exprn
+ELSE else_expr]
+END
+
+SELECT last_name,salary+1000 
+FROM employees
+WHERE department_id=10;
+
+SELECT 
+last_name,
+CASE department_id WHEN 10 THEN salary+1000
+                   WHEN 20 THEN salary+2000
+                   WHEN 30 THEN salary+3000
+                   WHEN 40 THEN salary+4000
+                   WHEN 50 THEN salary+5000
+                   ELSE salary+1500
+END AS "New SAL"
+FROM employees;
+
+DECODE(col|expression, search1, result1
+[, search2, result2,...,]
+[, default])
+
+
+SELECT last_name,
+DECODE(department_id,10,salary+1000,20,salary+2000,30,salary+3000,40,salary+4000,salary+1500) "NewSAL" 
+FROM employees
+
+
+
+Reporting Aggregated Data
+Using the Group Functions
+Use AVG, SUM, MIN, MAX, COUNT
+create table test1(id number,sal number);
+insert into test1 values(1,1000);
+insert into test1 values(2,2000);
+insert into test1 values(3,3000);
+insert into test1 values(4,4000);
+insert into test1 values(5,NULL);
+commit;
+
+
+
+  MIN(SAL)   MAX(SAL)   SUM(SAL)   AVG(SAL) COUNT(SAL)   COUNT(*)
+---------- ---------- ---------- ---------- ---------- ----------
+      1000       4000      10000       2500          4          5
+
+SQL> select min(sal),max(sal),sum(sal),avg(nvl(sal,0)),count(sal),count(*) from test1;
+
+SELECT AVG(salary)
+FROM employees
+GROUP BY department_id ;
+
+SELECT department_id, job_id, SUM(salary)
+FROM employees
+WHERE department_id > 40
+GROUP BY department_id, job_id
+ORDER BY department_id;
+
+SELECT department_id, MAX(salary)
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary)>10000 ;
+
+SELECT job_id, SUM(salary) PAYROLL
+FROM employees
+WHERE job_id NOT LIKE '%REP%'
+GROUP BY job_id
+HAVING SUM(salary) > 13000
+ORDER BY SUM(salary);
+
+select department_id,trunc(avg(salary)) 
+from employees
+where salary>5000
+group by department_id
+having avg(salary)>=8000
+order by department_id;
+
+SELECT department_id, COUNT(last_name)
+FROM employees;
+
+SELECT department_id, job_id, COUNT(last_name)
+FROM employees
+GROUP BY department_id;
+
+ select后面的表达式 可以聚合函数 或者 分组条件 
+ 
+ Displaying Data
+from Multiple Tables Using Joins
+
+--笛卡儿积
+--表之间的关系
+SELECT last_name,department_name
+FROM employees JOIN departments
+--USING(department_id);
+ON employees.department_id=departments.department_id;
+
+SELECT employees.last_name,departments.department_name
+FROM employees,departments
+WHERE employees.department_id=departments.department_id;
+
+SELECT e.last_name,d.department_name,l.city
+FROM employees e,departments d,locations l
+WHERE e.department_id=d.department_id 
+      AND d.location_id=l.location_id;
+
+select last_name from employees where department_id IS NULL;
+--外联结 （+）
+SELECT e.last_name,d.department_name
+--FROM employees e LEFT OUTER JOIN departments d
+--FROM employees e RIGHT OUTER JOIN departments d
+FROM employees e FULL OUTER JOIN departments d
+--WHERE e.department_id=d.department_id(+);
+ON e.department_id=d.department_id;
+
+
+
+Using Subqueries to Solve Queries
+SELECT last_name,salary FROM employees WHERE salary>8200;
+SELECT salary FROM employees WHERE last_name='Chen';
+SELECT salary FROM employees WHERE last_name='Smith';
+SELECT last_name,salary FROM employees 
+WHERE salary>(SELECT salary FROM employees WHERE last_name='Chen');
+
+SELECT last_name,salary FROM employees 
+WHERE salary>ANY(SELECT salary FROM employees WHERE last_name='Smith');
+单行比较符> < =
+>ALL  大于最大
+<ALL  小于最小
+>ANY  大于最小
+<ANY  小于最大
+
+Using the Set Operators
+create table t1 (id number,name char(10));
+create table t2 (id number,name char(10));
+
+insert into t1 values(1,'AA');
+insert into t1 values(2,'BB');
+insert into t2 values(1,'AA');
+insert into t2 values(3,'CC');
+commit;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

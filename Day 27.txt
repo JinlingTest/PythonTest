@@ -1,0 +1,204 @@
+客户机程序
+MySQL服务器开启
+tcpip （Linux windows）
+socket Linux     
+
+windows client namepipe share memory
+
+-h <host_name> 或--host=<host_name>
+-C 或--compress
+--protocol=<protocol_name>
+-P <port_number> 或--port=<port_number>
+-S <socket_name> 或--socket=<socket_name>
+--shared-memory-base-name=<shared_memory_name>
+管理程序和实用程序直接访问文件
+
+
+mysql_config_editor --login-path=<login-path>
+--user=<user> --password --host=<hostname>
+
+mysql --login-path=<login-path>
+
+[root@server00 ~]# mysql -uroot -p  --safe-updates
+
+; \g \G \c
+
+ PROMPT (\u@\h) [\d]\>
+ \u 用户名
+ \h 主机名
+ \d 数据库名 
+ 
+ @ （） >
+   171  mysqladmin -uroot -p1234 status
+  172  mysqladmin -uroot -p1234 shutdown
+  173  systemctl start mysqld
+  174  mysqladmin -uroot -p1234 processlist
+  175  mysqladmin -uroot -p1234 status variables
+ 
+ information_schema 内存表 
+ 类似ORACLE中的数据字典 和 实时查看状态信息
+mysql> use world
+Database changed
+mysql> show tables;
++-----------------+
+| Tables_in_world |
++-----------------+
+| city            |
+| country         |
+| countrylanguage |
++-----------------+
+3 rows in set (0.00 sec)
+
+mysql> select table_name from information_schema.tables where table_schema='world';
+
+mysql> show engines;
+select table_name,engine from information_schema.tables
+where table_schema='world';
+select table_schema,count(*) from information_schema.tables group by table_schema;
+
+  186  mysqldump -uroot -p db100 >my1.sql
+  187  mysqldump -uroot -p world >my2.sql
+  188  mysqldump -uroot -p world city >my3.sql
+
+show databases;
+show create table world.city\G
+mysql> show index from city\G
+show columns from countrylanguage\G
+show full columns from countrylanguage\G
+show character set\G
+show index from city\G
+show databases like '???'
+
+ mysqlshow -uroot -p1234
+ mysqlshow -uroot -p1234 world
+ mysqlshow -uroot -p1234 world city
+
+201  mysql_config_editor set --login-path=bb --user=root --password
+  202  mysql_config_editor print --login-path=aa
+  203  mysql_config_editor print --all
+  204  mysqlshow -uroot -p1234 world;
+  205  mysql_config_editor help
+  206  mysql_config_editor set --login-path=login1 --username=root --password
+  207  mysql_config_editor set --login-path=login1 --user=root --password
+  208  mysql_config_editor set --login-path=login2 --user=root --password --socket=/var/lib/mysql/mysql.sock
+  209  pwd
+  210  ls -a
+  211  file .mylogin.cnf 
+  212  strings .mylogin.cnf
+  213  mysql_config_editor print --all
+  214  mysql --login-path=login1
+
+
+mysql.user
+validate_password_length=0
+validate_password_policy=LOW
+create user 
+GRANT ALL PRIVILEGES ON *.* TO 'alice'@'localhost' identified by '1234';
+GRANT ALL PRIVILEGES ON *.* TO 'alice'@'192.168.0.20' identified by '4321';
+
+mysql> create user charlie@'%' identified by '1111';
+mysql> show grants for charlie@'%';
+mysql> grant select,update,delete,insert on world.city to charlie@'%';
+mysql> grant all on world to charlie@'%';
+mysql> grant all on *.* to charlie@'%';
+flush privileges;
+
+
+create user ''@'%' identified by '1111';
+
+===
+mkdir /backup
+chmod 777 /backup 
+在/etc/my.cnf的
+[mysqld]段落中
+secure-file-priv=/backup  （该目录将来可以存放mysql的文件了）
+# systemctl restart mysql
+
+创建Login-path 可以隐藏密码和简化登录信息录入 
+mysql_config_editor set --login-path=r --user=root --password
+配置信息在用户主目录 的.mylogin.cnf 文件中 可以用 下列命令查看
+# mysql_config_editor print --all
+[login1]
+user = root
+password = *****
+[login2]
+user = root
+password = *****
+socket = /var/lib/mysql/mysql.sock
+[r]
+user = root
+password = *****
+[r21]
+user = root
+password = *****host = 192.168.0.21
+mysqlshow --login-path=r    （查看数据库）
+mysqlshow --login-path=r world   （查看world数据库的表）
+mysqlshow --login-path=r world city  （查看world数据库的city表）
+mysql --login-path=r -e "drop database world"; 删除world数据库
+# mysql --login-path=r </root/world.sql     重新导入world数据库
+# mysqlshow --login-path=r world （查看world库中的表）
+备份 --单独备份每张表 (每个表分为两个文件：建表语句和表数据 )
+[root@server00 tmp]# mysqldump --login-path=r --tab=/backup world
+[root@server00 tmp]# ls /backup/
+mysql --login-path=r -e "create database worldnew";
+mysqlshow --login-path=r worldnew
+mysql --login-path=r worldnew < /backup/country.sql 
+mysql --login-path=r worldnew < /backup/countrylanguage.sql 
+mysql --login-path=r worldnew < /backup/city.sql 
+mysqlshow --login-path=r worldnew
+
+mysql --login-path=r -e "select count(*) from worldnew.country";
+mysqlimport --login-path=r worldnew /backup/country.txt         
+mysqlimport --login-path=r worldnew /backup/countrylanguage.txt 
+mysqlimport --login-path=r worldnew /backup/city.txt 
+
+mysqldump --login-path=r --database world >/backup/world.sql
+mysqldump --login-path=r --databases world worldnew >/backup/world_wnew.sql
+mysqldump --login-path=r --all-databases >/backup/db1.sql
+mysqldump --login-path=r --databases world --tables country countrylanguage >/backup/world_cc.sql
+mysqldump --login-path=r --databases world --tables country --where="code LIKE 'CO_'">/backup/world_ccc.sql
+
+mysql.user
+
+
+---0-口令忘记
+在my.cnf的【mysqld】添加 skip-grant-tables
+set password=PASSWORD('123');失败 原因是skip-grant-table
+ERROR 1290 (HY000): The MySQL server is running with the --skip-grant-tables option so it cannot execute this statement
+mysql> update mysql.user set authentication_string=PASSWORD('123') where user='root' and host='localhost'; 直接修改用户表中的口令
+
+去除 skip-grant-tables 重启
+# mysql -uroot -p123
+mysql> grant all privileges on *.* to root@'192.168.0.20' identified by "PASS123!xy";
+
+在20上连 21
+mysql -uroot -p'PASS123!xy' -h192.168.0.21
+mysql_config_editor set --login-path=r21 --user=root --password -h192.168.0.21
+mysql --login-path=r21
+
+# mysqldump --login-path=r --databases world |mysql --login-path=r21
+
+
+资源转载
+a. show tables或show tables from database_name; -- 显示当前数据库中所有表的名称。
+b. show databases; -- 显示mysql中所有数据库的名称。
+c. show columns from table_name from database_name; 或show columns from database_name.table_name; -- 显示表中列名称。
+d. show grants for user_name; -- 显示一个用户的权限，显示结果类似于grant 命令。
+e. show index from table_name; -- 显示表的索引。
+f. show status; -- 显示一些系统特定资源的信息，例如，正在运行的线程数量。
+g. show variables; -- 显示系统变量的名称和值。
+h. show processlist; -- 显示系统中正在运行的所有进程，也就是当前正在执行的查询。大多数用户可以查看他们自己的进程，但是如果他们拥有process权限，就可以查看所有人的进程，包括密码。
+i. show table status; -- 显示当前使用或者指定的database中的每个表的信息。信息包括表类型和表的最新更新时间。
+j. show privileges; -- 显示服务器所支持的不同权限。
+k. show create database database_name; -- 显示create database 语句是否能够创建指定的数据库。
+l. show create table table_name; -- 显示create database 语句是否能够创建指定的数据库。
+m. show engies; -- 显示安装以后可用的存储引擎和默认引擎。
+n. show innodb status; -- 显示innoDB存储引擎的状态。
+o. show logs; -- 显示BDB存储引擎的日志。
+p. show warnings; -- 显示最后一个执行的语句所产生的错误、警告和通知。
+q. show errors; -- 只显示最后一个执行语句所产生的错误。
+r. show [storage] engines; --显示安装后的可用存储引擎和默认引擎。
+
+
+
+

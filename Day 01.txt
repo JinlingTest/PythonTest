@@ -1,0 +1,166 @@
+Linux 类UNIX
+Windows
+UNIX
+
+Windows Server 2019、2016、2012、2008、2003、2000、NT4、NT3.5
+Release 1、2
+R2
+
+Windows Server 2012R2
+细分
+Foundation  部分功能不支持 1CPU 不支持虚拟化 15User
+Essentials  部分功能不支持 2CPU 不支持虚拟化 25User
+Standard    完整功能                 2虚机   License(CPU/Client)
+datecenter  完整功能                不限虚机 License
+
+windows 10/7  工作站个人
+
+windows网络架构
+1。工作组架构 workgroup  small  分布式 
+2。域架构     domain     big    集中制  （域控制器）
+
+
+工作组架构 workgroup  small  分布式  （简单文件打印服务）
+每台计算机都有本地安全帐户数据库 SAM DB
+server
+
+域架构     domain     big    集中制  （域控制器）
+计算机可以加入域
+域里有一个集中式数据库  目录数据库
+Active Directory Domain Service  AD DS
+
+domain controller 域控制器  （AD DS）
+member server  成员服务器 
+
+TCP/IP
+ip地址  （由网络位+主机位构成） 网络位一致的服务器在同一个网络（LAN  VLAN）
+同一个网络服务器 之间 直接通讯 p-p
+不同网络服务器之间 如果通讯   P-Router-P
+子网掩码可以用来分辨主机网络位 (逻辑与运算)
+172.17.15.6/255.255.255.0
+172.17.15.70
+
+11111111.11111111.11111111.00000000
+172.17.15.0
+172.17.15.0
+网关 172.16.15.1
+Windows 密码：P@$$w0rd
+
+32bit
+11111111.00000000.11111111.00001111
+255.0.255.15
+
+192.168.88.129
+172.17.15.6
+CIDR 无类地址(subnet mask)
+
+W.X.Y.Z
+Class A  W=1-126		W net X.Y.Z hostid  
+Class B  W=128-191		W.X netid Y.Z hostid
+Class C  W=192-223		W.X.Y netid  Z hostid
+
+Class D  W=
+Class E	 W=	
+
+0开头  	00000000  01111111 0-127  （0 127loopback环回
+10开头	10000000  10111111 128-191
+110     11000000  11011111 192-223
+1110
+1111 
+
+默认网关 （路由器的某个接口的IP地址）
+不同网络服务器之间 如果通讯   P-Router-P
+
+
+127
+
+IPV4
+私有地址的使用
+申请Public IP （PPPOE/专线）公网
+Private IP （NAT）Public IP 
+10.0.0.0   	255.0.0.0	10.0.0.1--10.255.255.254
+172.16.0.0  255.240.0.0	172.16.0.1-172.31.255.254
+192.168.0.0 255.255.0.0 192.168.0.1-192.168.255.254
+
+1。公司 家庭内部主机互相通讯
+2。通Internet （公网IP router）
+3。隐藏内部主机
+
+DHCP服务器
+ipconfig/release
+当一个windows 设置为自动获取IP地址 又没有DHCP服务器为期服务 会自己分配给自己一个
+Automatic Private IP Addressing  APIPA
+169.254.x.x/255.255.0.0
+
+
+安装windows 2012 r2 
+https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2012
+
+服务器核心安装 命令行 上线使用 环境安全
+GUI服务器   更容易配置
+
+exFAT FAT32 存储数据   NTFS 系统 数据
+
+
+ping 127.0.0.1 ip协议
+ping 192.168.0.10 NIC driver NIC IP
+ping 192.168.0.x  本网络其他主机 (default gateway)
+ping  另一个网络 （8.8.8.8）
+ping  另一个网络 （www.microsoft.com） 域名解析
+
+
+防火墙的三种设置途径(......)
+
+环境变量
+查看
+cmd     ------- set
+powershell  ---- dir env:
+
+
+设置
+系统环境变量 影响所有人
+用户环境变量 影响当前用户
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

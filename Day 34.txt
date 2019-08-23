@@ -1,0 +1,133 @@
+LAB1
+脚本 检测服务 如果正常 显示服务器正常一句话 如果不正常 就启动
+exam10.sh 服务名
+exam10.sh nginx
+exam10.sh httpd
+exam10.sh mysqld
+
+systemctl status service_name
+通过 $? 返回值来判断
+echo "....."
+systemctl start service_name
+
+[root@s55 sh_practice]# vi exam10.sh
+
+#!/usr/bin/bash
+#
+#
+
+if [ $# -ge 1 ];then
+systemctl status $1 &> /dev/null
+if [ $? -eq 0 ];then
+echo "$1 is running!"
+else
+systemctl start $1 &> /dev/null
+        if [ $? -eq 0 ];then
+        echo "你的$1服务没有启动，现在已经帮你启动"
+        else
+        echo "你的$1服务没有启动，现在已尝试帮你启动，但还没有成功请你联系管理员检查"
+        fi
+fi
+else
+        echo "请你在执行该脚本时 指定一个参数为你要检查的服务名"
+        echo "例如 /sh_practice/exam10.sh nginx"
+fi
+
+根据得分给学生评语
+1 手工填写得分
+2.各处评语     60yixia 
+
+#!/usr/bin/bash
+#
+#
+
+read -p "输入你的得分：" grade
+if [ ${grade} -ge 0 ] && [ ${grade} -lt 60 ];then
+echo "fail"
+elif [ ${grade} -ge 60 -a ${grade} -lt 80 ];then
+echo "pass"
+elif [[ ${grade} -ge 80 && ${grade} -lt 90 ]];then
+echo "good"
+elif [[ ${grade} -ge 90 && ${grade} -le 100 ]];then
+echo "excellent"
+else
+echo "你输入的分值有误 分数应在0-100之间"
+fi
+work directory------------------>stageing area---------------repositry仓库
+（exam10.sh）(git add exam10.sh)  exam文件可被track （git commit）
+
+
+备份mysql数据库world
+[root@s55 sh_practice]# vi exam12.sh
+
+#!/usr/bin/bash
+#
+#
+
+MYBAK=/mysqlbackup
+USER=root
+PASSWORD=1234
+DB=world
+MYDATE=`date +%Y%m%d`
+if [ ! -d ${MYBAK} ];then
+mkdir -p ${MYBAK}
+fi
+
+mysqldump -u$USER -p$PASSWORD --databases $DB > ${MYBAK}/$DB_$MYDATE.sql
+
+BAKFILE=${MYBAK}/$DB_$MYDATE.sql
+if [ -f ${BAKFILE} ];then
+        echo "今天是 $MYDATE $DB备份成功"
+        echo "$DB已经备份到目录$MYBAK中 名为$BAKFILE"
+else
+        echo "备份可能失败了 请检查....."
+fi
+
+
+exam12.sh 库名 目标目录
+
+#!/usr/bin/bash
+#
+#
+
+MYBAK=$2
+#USER=root
+#PASSWORD=1234
+DB=$1
+MYDATE=`date +%Y%m%d-%H:%M:%S`
+read -p "你要备份的数据库是${DB},你要将其备份到$MYBAK 确认用Y 否则输入N：" answer
+if [ ${answer} != 'Y' ];then
+echo "你没有选择Y 推推出备份"
+exit 100
+fi
+read -p "请你输入可以执行该操作的MySQL数据库用户名：" USER
+read -s -p "请你输入$USER用户名的密码：" PASSWORD
+if [ ! -d ${MYBAK} ];then
+mkdir -p ${MYBAK}
+fi
+
+mysqldump -u$USER -p$PASSWORD --databases $DB > ${MYBAK}/$DB_$MYDATE.sql
+
+BAKFILE=${MYBAK}/$DB_$MYDATE.sql
+if [ -f ${BAKFILE} ];then
+        echo "今天是 $MYDATE $DB备份成功"
+        echo "$DB已经备份到目录$MYBAK中 名为$BAKFILE"
+else
+        echo "备份可能失败了 请检查....."
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

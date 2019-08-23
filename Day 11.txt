@@ -1,0 +1,63 @@
+ NetworkManager
+ nmcli connection show [interface]
+ nmcli device show ens33
+ nmcli device status
+   413  nmcli device status 
+  414  nmcli device show ens33
+  415  nmcli connection add con-name "conn01" type ethernet ifname ens33
+   418  nmcli connection add con-name "conn02" ifname ens33 type ethernet ip4 192.168.0.50/24 gw4 192.168.0.2
+
+ root@server00 ~]# nmcli connection modify conn02 ipv4.dns 8.8.8.8
+[root@server00 ~]# nmcli connection modify conn02 +ipv4.dns 1.1.1.1
+[root@server00 ~]# nmcli connection modify conn01 ipv4.addr "192.168.0.60/24,192.168.0.61/24"
+[root@server00 ~]#
+
+ls -l
+tar cf myarch.tar   f1 f2 f3
+tar tf myarch.tar
+gzip
+bzip2
+xz 
+ 
+f c t x z j J      v
+
+在系统间复制文件scp 源 目标
+
+scp -r test@192.168.0.71:/home/test/a   ~/
+$ rsync -av test@192.168.0.71:/home/test/a   test
+
+-----
+PATA SATA SCSI U------- sd
+df -h
+h   MiB 2^20   GiB 2^30   1024
+H   MB  10^6   GB  10^9   1000
+
+du -h /home
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

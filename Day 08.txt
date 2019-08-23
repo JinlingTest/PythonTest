@@ -1,0 +1,20 @@
+1 自造 XMS CA （找CA购买）
+2 向www.northwind.com 发证书
+3 将证书和www.northwind.com绑定
+4. https://www.northwind.com
+5. 强制访问http 80时会被引向https 443
+
+1.添加角色---AD证书----
+（证书颁发机构）
+（证书颁发机构web注册）
+独立CA--根CA--创建新私钥
+
+2.信任CA  在本机信任CA
+  http://web.example.com/certsrv/
+  下载 CA 证书、证书链或 CRL
+  下载 CA 证书链 
+  保存一个文件certnew.p7b
+  mmc-证书-计算机 
+  受信任的证书颁发机构--任务-导入--该文件certnew.p7b
+
+3.在虚拟主机所在的IIS服务器--服务器证书---申请证书  

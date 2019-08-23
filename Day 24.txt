@@ -1,0 +1,458 @@
+配置文件 ---profile (资源控制)(口令安全)
+create profile pro1 limit 
+connect_time 10/1440
+idle_time 5/1440;
+
+CREATE PROFILE app_user LIMIT 
+   SESSIONS_PER_USER          3
+   CPU_PER_SESSION            UNLIMITED 
+   CPU_PER_CALL               UNLIMITED 
+   CONNECT_TIME               5
+   IDLE_TIME   1   
+   LOGICAL_READS_PER_SESSION  DEFAULT 
+   LOGICAL_READS_PER_CALL     1000 
+   PRIVATE_SGA                15K
+   COMPOSITE_LIMIT            5000000; 
+
+alter profile app_user LIMIT SESSIONS_PER_USER 1;
+
+Note: RESOURCE_LIMIT must be set to TRUE before profiles can impose
+resource limitations
+
+
+ALTER PROFILE app_user LIMIT
+PASSWORD_LIFE_TIME 180
+PASSWORD_GRACE_TIME 7
+PASSWORD_REUSE_TIME UNLIMITED
+PASSWORD_REUSE_MAX 10
+FAILED_LOGIN_ATTEMPTS 3
+PASSWORD_LOCK_TIME 1
+PASSWORD_VERIFY_FUNCTION
+ora12c_verify_function;
+
+SQL> alter user alice account unlock;
+
+User altered.
+
+alter user alice identified by "123" replace "123456";
+
+
+逻辑
+数据库-表空间-段-区-块
+create user hrdba identified by "123456" profile DEFAULT
+  2  default tablespace USERS temporary tablespace TEMP;
+物理
+数据文件 
+col tablespace_name for a15
+col file_name for a45
+select  tablespace_name from dba_tablespaces;
+select tablespace_name,file_name from dba_data_files;
+select tablespace_name,file_name from dba_temp_files;
+
+建表空间
+create tablespace tbs1 datafile '/u01/app/oracle/oradata/orcl/tbs1.dbf' size 20M autoextend on;
+
+alter tablespace tbs1 add datafile '/u01/app/oracle/oradata/orcl/tbs1_2.dbf' size 10M;
+alter database datafile '/u01/app/oracle/oradata/orcl/tbs1_2.dbf' resize 20M;
+alter database datafile '/u01/app/oracle/oradata/orcl/tbs1_2.dbf' autoextend on next 5M maxsize 30G;
+
+create smallfile tablespace tbs2 datafile '/u01/app/oracle/oradata/orcl/tbs2_1.dbf' size 20M autoextend on next 10M maxsize 10G, '/u01/app/oracle/ oradata/orcl/tbs2_2.dbf' size 30M autoextend on;
+
+create bigfile tablespace tbs3 datafile '/u01/app/oracle/oradata/orcl/tbs3.dbf' size 20M autoextend on;
+
+SQL> !mkdir -p /u01/app/oracle/oradata/orcl/new
+
+SQL> create table hr.test10 tablespace tbs1 as select * from dba_objects where rownum<50001;
+
+Table created.
+
+SQL> select tablespace_name from dba_tables where table_name='TEST10';
+
+TABLESPACE_NAME
+---------------
+TBS1
+
+SQL> alter database move datafile '/u01/app/oracle/oradata/orcl/tbs1.dbf' to '/u01/app/oracle/oradata/orcl/new/tbs1.dbf';
+
+Database altered.
+
+SQL> alter database move datafile '/u01/app/oracle/oradata/orcl/tbs1_2.dbf' to '/u01/app/oracle/oradata/orcl/new/tbs1_2.dbf';
+
+SQL> create temporary tablespace temp1 tempfile '/u01/app/oracle/oradata/orcl/temp1.dbf' size 20M;
+
+
+Oracle Managed Files (OMF)
+alter system set DB_CREATE_FILE_DEST='/u01/app/oracle/oradata' scope=both;
+SQL> alter system set DB_CREATE_FILE_DEST='/u01/app/oracle/oradata' scope=both;
+
+System altered.
+
+SQL> create tablespace tbs5;
+
+Tablespace created.
+
+SQL> select tablespace_name,file_name from dba_data_files;
+
+
+DB_CREATE_ONLINE_LOG_DEST_n
+DB_RECOVERY_FILE_DEST
+
+You can enlarge the database in the following ways:
+• Create a new tablespace.
+• Add a data file to an existing smallfile tablespace.
+• Increase the size of a data file.
+• Provide for the dynamic growth of a data file.
+
+table----段
+
+DEFERRED_SEGMENT_CREATION
+段的延迟创建
+
+CREATE TABLE SEG_TAB3(C1 number, C2 number) SEGMENT CREATION IMMEDIATE TABLESPACE SEG_TBS;
+CREATE TABLE SEG_TAB4(C1 number, C2 number)
+SEGMENT CREATION DEFERRED;
+SQL> create table hr.test40(id number,name char(20)) segment creation immediate tablespace tbs1;
+
+Table created.
+
+SQL> select segment_name,bytes from dba_segments where segment_name in ('TEST10');
+
+create table hr.test10 tablespace tbs1 as select * from dba_objects where rownum<50001;
+
+SQL> select count(*) from hr.test10;
+
+  COUNT(*)
+----------
+     50000
+
+SQL> select segment_name,bytes/1024/1024 from dba_segments where segment_name in ('TEST10');
+
+SEGMENT_NAME
+--------------------------------------------------------------------------------
+BYTES/1024/1024
+---------------
+TEST10
+              8
+
+
+SQL> insert into hr.test10 select * from hr.test10;
+
+50000 rows created.
+
+SQL> /
+
+100000 rows created.
+
+SQL> /
+
+200000 rows created.
+
+SQL> /
+
+400000 rows created.
+
+SQL> select count(*) from hr.test10;
+
+  COUNT(*)
+----------
+    800000
+
+SQL> select segment_name,bytes/1024/1024 from dba_segments where segment_name in ('TEST10');
+
+SEGMENT_NAME
+--------------------------------------------------------------------------------
+BYTES/1024/1024
+---------------
+TEST10
+            128
+
+
+SQL> delete hr.test10 where rownum<400001;
+
+400000 rows deleted.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> select count(*) from hr.test10;
+
+  COUNT(*)
+----------
+    400000
+
+SQL> select segment_name,bytes/1024/1024 from dba_segments where segment_name in ('TEST10');
+
+SEGMENT_NAME
+--------------------------------------------------------------------------------
+BYTES/1024/1024
+---------------
+TEST10
+            128
+
+
+SQL> ALTER TABLE hr.test10 enable ROW MOVEMENT;
+
+Table altered.
+
+SQL> ALTER TABLE hr.test10 SHRINK SPACE COMPACT;
+
+Table altered.
+
+SQL> ALTER TABLE hr.test10 SHRINK SPACE ;
+
+Table altered.
+
+
+数据并发
+粒度 行
+High level of data concurrency:
+– Row-level locks for inserts, updates, and deletes
+– No locks required for queries
+
+Each DML transaction must acquire two locks:
+• EXCLUSIVE row lock on the row or rows being updated
+• Table lock (TM) in ROW EXCLUSIVE (RX) mode on the
+table containing the rows
+
+SQL> UPDATE employees
+SET salary=salary*1.1
+WHERE employee_id= 107;
+• 0 - none					NONE
+• 1 - null (NULL)			NULL
+• 2 - row-S (SS)			row share
+• 3 - row-X (SX)			row exclusive
+• 4 - share (S)				share
+• 5 - S/Row-X (SSX)         share row exclusive
+• 6 - exclusive (X)			exclusive
+
+v$lock SID
+v$session  
+v$sql
+SQL> select sid,TYPE,LMODE from v$lock where sid=17 and type IN('TM','TX');
+
+       SID TY      LMODE
+---------- -- ----------
+        17 AE          4
+        17 TM          3
+        17 TX          6
+
+SQL> select sid from v$session where username='HR';
+
+       SID
+----------
+        17
+
+SQL> select SQL_TEXT from v$sql where SQL_TEXT like '%employee_id=%';
+
+SQL_TEXT
+--------------------------------------------------------------------------------
+UPDATE employees SET salary=salary*1.1 WHERE employee_id= 107
+select SQL_TEXT from v$sql where SQL_TEXT like '%employee_id=%'
+
+SQL> 
+SQL> select sid,TYPE,LMODE from v$lock where sid=17;
+
+       SID TY      LMODE
+---------- -- ----------
+        17 AE          4
+        17 TM          3
+        17 TX          6
+
+SQL> select sid,TYPE,LMODE from v$lock where sid=17 and type IN('TM','TX');
+
+
+SQL> select sid,TYPE,LMODE,request from v$lock where sid IN(16,17,402) and type IN('TM','TX');
+SQL> drop table employees;
+drop table employees
+           *
+ERROR at line 1:
+ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+SQL> select sid ,serial# from v$session where sid=387;
+SQL> alter system kill session '387,56873' im
+
+给表加锁
+表级锁 TM
+2 - row-S (SS)			row share
+• 3 - row-X (SX)			row exclusive
+• 4 - share (S)				share
+• 5 - S/Row-X (SSX)         share row exclusive
+• 6 - exclusive (X)			exclusive
+SQL> lock table employees in row exclusive mode;
+
+SQL> select sid from v$session where username='HR';
+
+       SID
+----------
+        17
+       402
+
+SQL> 
+
+
+
+
+SQL> select sid,TYPE,LMODE,request from v$lock where sid IN (17,402) and type IN('TM','TX');
+
+       SID TY      LMODE    REQUEST
+---------- -- ---------- ----------
+       402 TM          0          4
+        17 TM          3          0
+表
+sequence
+
+
+
+
+SQL> create sequence seq1;
+取值 伪列
+select seq1.nextval	 from dual;
+create table t50 (id number,name char(10)) tablespace tbs1;
+insert into t50 values(seq1.nextval,'aa')
+insert into t50 values(seq1.nextval,'bb')
+select seq1.currval	 from dual;
+SQL> create sequence seq1;
+
+Sequence created.
+
+SQL> select seq1.nextval from dual;
+
+   NEXTVAL
+----------
+         1
+
+SQL> select seq1.nextval from dual;
+
+   NEXTVAL
+----------
+         2
+
+SQL> create table t50 (id number,name char(10)) tablespace tbs1;
+
+Table created.
+
+SQL> insert into t50 values(seq1.nextval,'aa');
+
+1 row created.
+
+SQL> insert into t50 values(seq1.nextval,'bb');
+
+1 row created.
+
+SQL> commit;
+
+CREATE SEQUENCE seq2
+INCREMENT BY 2
+START WITH 101
+MAXVALUE 150
+MINVALUE 90
+CYCLE
+CACHE 5;
+
+
+CREATE SEQUENCE seq4
+CACHE 100;
+USER_SEQUENCES
+ALL_SEQUENCES
+DBA_SEQUENCES
+
+---------------
+synonym 
+SQL> create synonym ep for employees;
+Synonym created.
+
+k 
+create public synonym eps for hr.employees;
+
+dba_synonyms
+
+SQL> col SYNONYM_NAME for a30
+SQL> col TABLE_NAME for a30
+SQL> select SYNONYM_NAME,TABLE_NAME from dba_synonyms;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

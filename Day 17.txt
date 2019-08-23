@@ -1,0 +1,189 @@
+NetworkManager
+nmcli connection show [interface]
+nmcli device show ens33
+nmcli device status
+nmcli device status 
+nmcli device show ens33
+nmcli connection add con-name "conn01" type ethernet ifname ens33
+nmcli connection add con-name "conn02" ifname ens33 type ethernet ip4 192.168.0.50/24 gw4 192.168.0.2
+nmcli connection add con-name "conn03" ifname ens33 type ethernet ip4 192.168.0.60/24 gw4 192.168.0.2
+
+网卡 
+网络接口
+设备 device  名字
+连接 connection （设备的配置信息的集合）
+一个设备有多个connection 尽可以激活一个connection
+每个connect有一个名字 自定义
+[root@server01 ~]# nmcli connection down con37 
+成功取消激活连接 'con37'（D-Bus 活动路径：/org/freedesktop/NetworkManager/ActiveConnection/41）
+
+[root@server01 ~]# nmcli connection up con37-70
+[root@server01 ~]# nmcli device  disconnect ens37
+成功断开设备 'ens37'。
+   36  tail -15 /etc/sysconfig/network-scripts/ifcfg-con37
+   37  nmcli connection modify  con37 +ipv4.dns 1.1.1.1
+   38  tail -15 /etc/sysconfig/network-scripts/ifcfg-con37
+   39  nmcli connection modify  con37 ipv4.address 192.168.0.61
+   40  tail -15 /etc/sysconfig/network-scripts/ifcfg-con37
+   41  nmcli connection modify  con37 +ipv4.address 192.168.0.62
+   42  tail -17 /etc/sysconfig/network-scripts/ifcfg-con37
+   43  nmcli connection up con37
+   # nmcli connection  modify con37 connection.autoconnect yes
+   
+   
+   ens38+ens39  ---binding --band0
+   
+   ens38+ens39  ---team----- 接口组team3839
+   HA ActiveBackup
+      LoadBalance
+	  
+	  Roundrobin
+	  
+	  JSON语法
+	# nmcli connection add type team con-name team0 ifname team3839 config '{"runner": {"name": "loadbalance"}}'  
+	  [root@server01 ~]# nmcli connection add type team-slave con-name tp1 ifname ens38 master team3839
+连接“team-slave-ens38”(a7a3734b-2592-40ab-a418-56d13aadea91) 已成功添加。
+[root@server01 ~]# nmcli connection add type team-slave con-name tp2 ifname ens39 master team3839 
+连接“team-slave-ens39”(523045ec-d00a-4781-9af3-aa9b77e9fa35) 已成功添加。
+[root@server01 ~]# nmcli connection modify team0 ipv4.address 192.168.0.80/24
+[root@server01 ~]# nmcli connection modify team0 ipv4.dns 8.8.8.8
+[root@server01 ~]# nmcli connection modify team0 ipv4.gateway 192.168.0.2
+   # nmcli connection up team0
+ # teamdctl team3839 state
+
+
+
+  166  nmcli connection delete con37
+  167  nmcli connection show
+  168  nmcli device show
+  169  nmcli device show|grep -A 5 设备
+  170  nmcli connection add type team con-name team0 ifname team0dev config '{"runner": {"name": "activebackup"}}'
+  171  nmcli connection modify team0 ipv4.addresses '192.168.0.30/24'
+  172  nmcli connection modify team0 ipv4.dns '8.8.4.4'
+  173  nmcli connection modify team0 ipv4.gateway '192.168.0.2'
+  174  nmcli connection add type team-slave con-name team0port1 ifname ens38 master team0
+  175  nmcli connection add type team-slave con-name team0port2 ifname ens39 master team0
+  176  teamdctl team0dev state
+  177  nmcli device disconnect ens38
+  178  teamdctl team0dev state
+  179  ping 192.168.0.2
+  180  ping -I team0dev 192.168.0.2
+
+
+[root@server01 ~]# nmcli connection add type bridge con-name br1 ifname br1device
+连接“br1”(f89ddc15-12d5-41f8-9fcc-6f2aa3b732dc) 已成功添加。
+[root@server01 ~]# nmcli connection add type bridge-slave con-name br1-p1 ifname ens40 master br1
+连接“br1-p1”(8341d2ee-cd74-488b-94e6-eeadacae9970) 已成功添加。
+[root@server01 ~]# nmcli connection add type bridge-slave con-name br1-p2 ifname ens41 master br1  
+连接“br1-p2”(08df47d8-17a4-4e7c-9633-cf98aa334d7a) 已成功添加。
+[root@server01 ~]# brctl show
+
+
+
+SELinux
+/etc/sysconfig/selinux 
+开启SELINUX=enforcing
+
+>getenforce
+Enforcing
+
+setenforce 0
+Permissive
+
+进程---file 
+进程---目录
+进程---端口
+
+文件 进程 会增加一个安全标签-----selinux安全上下文
+用户 角色 类型 敏感度
+目前---类型
+chcon -t httpd_sys_content_t /var/www/html/ucadmin/install/index.php
+restorecon -vR /var/www/html/
+
+mkdir /var/www/
+mkdir /test 
+
+================
+rm -rf /virtual01
+mkdir /virtual01
+echo 'hi cloud' >/virtual01/index.html
+
+
+echo '192.168.0.22 www.hi.com' >>/etc/hosts
+
+echo '<VirtualHost 192.168.0.22:80>' >/etc/httpd/conf.d/hi.com.conf
+echo 'ServerAdmin root@hi.com' >>/etc/httpd/conf.d/hi.com.conf
+echo 'ServerName www.hi.com' >>/etc/httpd/conf.d/hi.com.conf
+echo 'DocumentRoot "/virtual01"' >>/etc/httpd/conf.d/hi.com.conf
+echo '<Directory "/virtual01">' >>/etc/httpd/conf.d/hi.com.conf 
+echo 'Options Indexes FollowSymLinks' >>/etc/httpd/conf.d/hi.com.conf
+echo 'AllowOverride None' >>/etc/httpd/conf.d/hi.com.conf
+echo 'Require all granted' >>/etc/httpd/conf.d/hi.com.conf
+echo '</Directory>' >>/etc/httpd/conf.d/hi.com.conf
+echo '</VirtualHost>' >>/etc/httpd/conf.d/hi.com.conf
+
+systemctl restart httpd  
+semanage fcontext -a -t httpd_sys_content_t '/virtual01(/.*)?'
+restorecon -RFvv /virtual01  
+
+selinux bool
+getsebool -a
+
+个人主站
+"/etc/httpd/conf.d/userdir.conf"
+UserDir public_html
+
+useradd tom
+   17  passwd tom
+   18  chmod -R 711 /home/tom
+   19  mkdir /home/tom/public_html
+   20  chmod -R 755 /home/tom/public_html
+   21  touch /home/tom/public_html/index.html
+   22  echo "this is tom homepage" >/home/tom/public_html/index.html
+   23  elinks http://127.0.0.1/~tom/index.html
+   
+   systemctl restart httpd
+   
+   [root@server02 ~]# getsebool httpd_enable_homedirs
+httpd_enable_homedirs --> off
+[root@server02 ~]# setsebool -P httpd_enable_homedirs on
+[root@server02 ~]# getsebool httpd_enable_homedirs   
+httpd_enable_homedirs --> on
+
+elinks http://127.0.0.1/~tom/index.html
+
+   
+
+
+
+   19  vi /etc/ssh/sshd_config 
+   20  systemctl restart sshd
+   21  journalctl -xe
+   selinux端口控制
+   22  semanage port -l 
+   23  semanage port -l|grep sshd
+   24  semanage port -l|grep ssh
+   25  semanage port -a -t ssh_port_t -p tcp 22005
+   26  semanage port -l|grep ssh
+   27  systemctl restart sshd
+   28  semanage port -l|grep http
+   semanage port -d -t ssh_port_t -p tcp 22005
+
+
+
+
+
+
+ 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+
+

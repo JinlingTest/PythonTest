@@ -1,0 +1,197 @@
+Linux用户
+程序--进程----特定用户
+file----owner
+/etc/passwd
+john117:x:1000:1000:John117:/home/john117:/bin/bash
+username:password:UID:GID:GECOS:主目录:Shell
+
+ (/bin/bash)(/sbin/nologin)
+ 
+/etc/group
+
+u3
+u3
+将u3加入u3组  u3是u3用户的
+主要组 1
+补充组 0-n
+
+root
+su - 
+su - root
+su - u1
+
+sudo 
+/etc/sudoers
+
+useradd
+usermod
+userdel
+
+groupadd
+groupmod
+groupdel
+
+/etc/shadow
+u2:!!:18075:2:90:7:10:20000:
+username:pssword:最近更改密码的时间(19700101):min:max:warn:inactive:expire:blank
+usermod  
+
+f1 owner/group
+
+r=4
+w=2
+x=1
+rw-  6
+rwx (7)
+
+文件特殊权限 （owner group）
+owner  setuid  u+s  表明运行该文件(程序)时 以owner身份运行 而不是以执行者身份
+group  setgid  g+s  表明运行该文件(程序)时 以group身份运行 而不是以执行者身份
+
+
+文件夹特殊权限（group other）
+group  setgid  g+s  表明在该文件夹中创建的文件的group为文件夹group
+other  sticky  o+t   有写权限的用户 只能删自己文件 
+# ls -ld /dir1
+drwxrwxrwx 2 root root 6 7月   2 14:21 /dir1
+# su - u5
+$ touch /dir1/file5
+$ ls -l /dir1/file5
+-rw-r--r-- 1 u5 g1 0 7月   2 14:23 /dir1/file5
+
+# chmod g+s /dir2 
+# ls -ld /dir2
+drwxrwsrwx 2 root root  6 7月   2 14:21 /dir2
+
+$ touch /dir2/file5
+$ ls -l /dir2/file5
+-rw-r--r-- 1 u5 root 0 7月   2 14:24 /dir2/file5
+
+
+
+程序--进程
+ps aux   进程号 用户 程序名 资源(CPU MEM) 状态 TTY
+ps -ef   进程号 父进程号 用户 程序名  TTY
+
+
+作业控制
+允许单个sell管理多个进程
+将进程调入后台
+root@server00 ~]# sleep 1000 &
+[1] 63680
+job  pid
+
+进程管理信号
+
+2 INT  键盘中断 Ctrl-c
+9 KILL  中断 无法拦截    kill -9 PID
+15 TERM 终止 可以被拦截  kill -15 PID
+18 CONT 继续             kill -18 PID
+20TSTP 键盘停止 Ctrl-z
+# killall -9 -u u1 sleep
+pkill -9 sleep
+# pkill -9 -P 64193 sleep
+# pkill -9 -t pts/2 -U 1001 sleep
+
+监控进程活动
+run time 
+avg load
+root@server00 ~]# grep 'model name' /proc/cpuinfo
+model name	: Intel(R) Core(TM) i5-7500 CPU @ 3.40GHz
+model name	: Intel(R) Core(TM) i5-7500 CPU @ 3.40GHz
+[root@server00 ~]# grep 'model name' /proc/cpuinfo|wc -l
+2
+[root@server00 ~]# uptime
+ 16:14:56 up 19:13, 13 users,  load average: 0.06, 0.03, 0.05
+1Min 5Min 15Min
+
+0.06/2=0.03
+
+
+
+top 	[||||||||||                                               ]
+
+   PID USER      PR优先级  NI    VIRT虚拟内存    RES常驻内存    SHR Sstate  %CPU %MEM     TIME+ COMMAND        
+  7229 john117   20   0 2432848 226960  16832 S   6.6 22.7  17:56.37 gnome-shell    
+  6830 root      20   0  343020  51632  13884 S   4.0  5.2   7:54.42 X   
+
+ps top
+& fg bg kill  pkill kill
+
+
+
+守护进程 ----
+由systemd
+yum install httpd -y
+systemctl start httpd
+systemctl stop httpd
+systemctl status httpd
+curl http://192.168.0.20
+
+vi /etc/sysconfig/network-scripts/ifcfg-ens33
+IPADDR=192.168.0.20
+PREFIX=24
+GATEWAY=192.168.0.2
+DNS1=8.8.8.8
+
+systemctl restart network
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

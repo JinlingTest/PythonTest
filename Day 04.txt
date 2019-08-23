@@ -1,0 +1,120 @@
+NTFS文件系统特性
+1 可以设置权限
+2 EFS
+3 QUOTA
+
+
+访问网络文件系统--共享文件夹 整个驱动器
+FAT FAT32 NTFS exFAT
+
+共享权限
+读  查看文件(夹)内容 执行
+更改 新建  更改内容
+完全控制 以上+更改共享权限
+
+
+基于NTFS:
+本机交互式访问 仅受NTFS权限控制
+网络访问   不仅受NTFS权限控制 还要受到Share权限控制
+           二者最严格要求
+			RW					everyone(FC)
+			
+\\win01\a
+\\192.168.0.10\a
+f:
+
+win7/8/10 
+win2012			
+
+Offline
+Server端 设置共享中的缓存
+（1指定/3自动   2禁止缓存）		
+			
+客户端设置脱机文件夹
+win7 /8/10 
+win2012		
+
+卷影副本
+访问共享文件
+
+打印服务
+
+打印服务器(windows Server)
+打印机(对象)
+打印设备(USB/蓝牙/IP (有线/无线))
+步骤
+1。安装文件和打印服务 --服务于LAN办公环境 
+(可选Internet 打印[IIS web server]) 服务于互联网
+2。购买一台"print device" （USB）（IP）
+（USB）：控制面板
+3。一台"print device" ip=192.168.0.88
+
+
+
+添加一台打印机(软件)------一台"print device"
+
+本地用户配置文件----漫游  profiles
+win01-03  （u001）
+\\win01\profiles\%username%
+
+===============
+组策略 安全性
+组策略 （computer/User）
+
+本地策略
+工作组 独立服务器 
+关闭关机理由 测试
+gpedit.msc
+本地策略/computer/
+本地策略/User/
+
+
+域 
+域策略 /User/ 控制面板 
+域策略 /Computer/ 软件运行  
+1 在服务器上设置
+2 在客户端服务 application identity开启
+确定并验证应用程序的标识。禁用此服务将阻止强制执行 AppLocker。
+  （组策略强制开启）
+ ()
+更改过域安全策略 生效
+(5min-15min 域控重启 gpupdate/force)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+			
+						
+
+
+

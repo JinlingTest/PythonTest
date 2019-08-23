@@ -1,0 +1,91 @@
+ web服务器
+ windows IIS
+ Linux Apache Nginx
+ 
+ 1.申请域名(略)
+ 2。安装IIS （DC member）
+    http://127.0.0.1   OK
+	http://localhost   
+	UNIX/Linux(/etc/hosts)
+	Windows(c:\windows\system32\drivers\etc\hosts)
+	(Default Site)
+	http://192.168.0.50
+	http://win05.example.com  (DNS)
+	http://www.example.com
+	
+	网站基本设置
+	http://www.example.com
+	http://www.example.com/iisstart.htm  (默认首页文件)
+	
+	
+	HTTP重定向 
+		网站主页目录 c:\inetpub\wwwroot\
+	物理目录   c:\inetpub\wwwroot\sports
+	虚拟目录
+	
+	
+	一个装了IIS的主机上
+	建立多个网站 虚拟主机
+	域名www.northwind.com 绑定ip 200.100.50.50  (DNS中要建立主机记录)
+	主目录c:\webroot\nortwind.com 目录中放置index.htm文件
+	ip/tcp:80 HTTP
+	
+	.....
+	静态
+	动态IIS 
+	aps.net (添加IIS模块 ASP.net 3.5 4.5  较高速的网络 从微软下载)
+	PHP (添加IIS模块 CGI
+		Apache PHP
+		https://www.microsoft.com/web/downloads/platform.aspx
+		Web PI (下载)
+		
+	LAMP
+	
+----------------------------------	
+	公钥 加密  
+	私钥 解密  
+	颁发给 www.northwind.com
+	颁发者 GOV CA
+	
+	
+1 自造 XMS CA （找CA购买）
+2 向www.northwind.com 发证书
+3 将证书和www.northwind.com绑定
+4. https://www.northwind.com
+5. 强制访问http 80时会被引向https 443
+
+1.添加角色---AD证书----
+（证书颁发机构）
+（证书颁发机构web注册）
+独立CA--根CA--创建新私钥
+
+2.信任CA  在本机信任CA
+  http://web.example.com/certsrv/
+  下载 CA 证书、证书链或 CRL
+  下载 CA 证书链 
+  保存一个文件certnew.p7b
+  mmc-证书-计算机 
+  受信任的证书颁发机构--任务-导入--该文件certnew.p7b
+  
+  
+  
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

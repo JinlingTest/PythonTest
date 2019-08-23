@@ -1,0 +1,210 @@
+使用Keepalived 给Nginx做HA
+[root@s151 ~]# vi /etc/keepalived/keepalived.conf 
+
+! Configuration File for keepalived
+
+global_defs {
+   router_id s151
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 20
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 6666
+    }
+    virtual_ipaddress {
+        192.168.0.150
+    }
+}
+
+
+[root@s154 ~]# vi /etc/keepalived/keepalived.conf 
+
+! Configuration File for keepalived
+
+global_defs {
+   router_id s154
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 77
+    priority 30
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 9999
+    }
+    virtual_ipaddress {
+        192.168.0.150
+    }
+}
+
+
+
+
+#192.168.0.151  news.example.com sport.example.com
+#192.168.0.154  news.example.com sport.example.com
+192.168.0.150   news.example.com sport.example.com
+
+
+
+
+HAproxy
+
+#---------------------------------------------------------------------
+frontend  main *:80
+    acl url_static       path_beg       -i /static /images /javascript /stylesheets
+    acl url_static       path_end       -i .jpg .gif .png .css .js
+
+    use_backend static          if url_static
+    default_backend             app
+
+#---------------------------------------------------------------------
+# static backend for serving up images, stylesheets and such
+#---------------------------------------------------------------------
+backend static
+    balance     roundrobin
+    server      static 127.0.0.1:4331 check
+
+#---------------------------------------------------------------------
+# round robin balancing between the various backends
+#---------------------------------------------------------------------
+backend app
+    balance     roundrobin
+    server  web1 192.168.0.152:80 check
+    server  web2 192.168.0.153:80 check
+    server  web3 192.168.0.155:80 check
+
+
+
+
+
+
+基于
+LAMP (Zabbix server)
+host1
+host2
+host3
+.....
+host1000(Zabbix Agent)
+
+
+# yum install httpd mysql-community-server  php php-mysql -y
+
+[root@s170 ~]# systemctl enable httpd
+Created symlink from /etc/systemd/system/multi-user.target.wants/httpd.service to /usr/lib/systemd/system/httpd.service.
+[root@s170 ~]# systemctl enable mysqld
+[root@s170 ~]# systemctl start httpd
+[root@s170 ~]# systemctl start mysqld
+[root@s170 ~]# mysql -uroot -p"`awk '/temporary password/{print $NF}' /var/log/mysqld.log`"
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3
+Server version: 5.7.27
+
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> set global validate_password_policy=0;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set global validate_password_length=0;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set password=PASSWORD('1234');
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql> exit
+Bye
+[root@s170 ~]# mysql -uroot -p1234
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 4
+Server version: 5.7.27 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+mysql> create database zabbix character set utf8 collate utf8_bin;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+
+rpm -Uvh https://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-2.el7.noarch.rpm
+# yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
+
+ zcat /usr/share/doc/zabbix-server-mysql-4.2.5/create.sql.gz | mysql -uzabbix -p  zabbix
+
+Edit file /etc/zabbix/zabbix_server.conf
+DBPassword=zabbix
+
+Edit file /etc/httpd/conf.d/zabbix.conf, uncomment and set the right timezone for you.
+php_value date.timezone Asia/Shanghai
+
+systemctl enable zabbix-server zabbix-agent httpd
+systemctl restart zabbix-server zabbix-agent httpd
+
+
+[root@server00 ~]# grep '^Server=' /etc/zabbix/zabbix_agentd.conf
+Server=192.168.0.170
+[root@server00 ~]# grep '^ServerActive=' /etc/zabbix/zabbix_agentd.conf
+ServerActive=192.168.0.170
+[root@server00 ~]# grep '^Hostname' /etc/zabbix/zabbix_agentd.conf
+Hostname=192.168.0.20
+[root@server00 ~]# systemctl enable zabbix-agent.service 
+
+[root@server02 ~]# sed -i /^Server/s/127.0.0.1/192.168.0.170/ /etc/zabbix/zabbix_agentd.conf 
+
+[root@server02 ~]# sed -i /^Hostname/c\Hostname=`ip a s ens33|grep 'scope global'|awk '//{print $2}'|awk 'BEGIN{FS="/"}{print $1}'|head -1` /etc/zabbix/zabbix_agentd.conf 
+
+
+修复中文字库
+grep ZBX_GRAPH_FONT_NAME /usr/share/zabbix/include/defines.inc.php
+[root@s170 ~]# grep ZBX_GRAPH_FONT_NAME /usr/share/zabbix/include/defines.inc.php
+define('ZBX_GRAPH_FONT_NAME',           'graphfont'); // font file name
+字库文件 graphfont
+
+find /usr/share/zabbix -name "graphfont*"
+
+[root@s170 ~]# find /usr/share/zabbix -name "graphfont*"
+/usr/share/zabbix/assets/fonts/graphfont.ttf
+
+
+C:\Windows\Fonts
+[root@s170 ~]# cp SIMSUN.TTC  /usr/share/zabbix/assets/fonts/graphfont.ttf
+cp：是否覆盖"/usr/share/zabbix/assets/fonts/graphfont.ttf"？ y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

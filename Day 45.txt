@@ -1,0 +1,206 @@
+编程方式：
+命令编程（statement control structure（loop contition） function）
+函数编程（纯函数 匿名函数 高阶函数 迭代 装饰器.. ）
+
+OOP(class----instance)
+ variable  function
+类内部的变量叫attribute   内部的函数叫method
+class Person:
+
+    name=‘alice’
+	weight=50
+	
+	
+
+u01=Person('alice','F',18)	
+         
+class Animal:                                  #superclass
+        legs=4
+        def __init__(self,name,color):
+           self.name=name
+           self.color=color
+        def action(self):
+             return 'running'
+class Brid(Animal):
+    legs=2
+    def voice(self):
+        return '啾啾啾'
+    def action(self): #子类Method设置的覆盖超类Method
+        return 'flying '+super().action() #super()调用超类
+class Dog(Animal):     #subclass
+     def voice(self):
+        return '汪汪汪'
+class Cat(Animal):
+    def voice(self):
+        return '喵喵喵'
+class Butterfly(Animal):
+    legs=6      #子类Attribute设置的覆盖超类Attribute
+    def voice(self):
+        return '-----'
+    def action(self): #子类Method设置的覆盖超类Method
+        return 'flying'
+
+cat1=Cat('tom','deepBlue')
+print(cat1.name,cat1.legs,cat1.voice(),cat1.action())
+butterfly1=Butterfly('alice','White')
+print(butterfly1.name,butterfly1.action())
+brid1=Brid('wanda','red')
+print(brid1.name,brid1.color,brid1.legs,brid1.action())
+
+instance=class(arg)
+instance.attribute
+instance.method()
+
+运算MagicMethod
++ __add__
+- __sub__
+* __mul__
+/ __truediv__
+// __floordiv__
+% __mod__
+** __pow__
+
+逻辑magicMethod
+& __and__
+| __or__
+^ __xor__
+
+比较的
+<	__lt__
+<=	__le__
+>   __gt__
+>=  __ge__
+==  __eq__
+!=  __ne__
+
+>>> v1=list([0,1,2,3,4,5,6,7])
+>>> v1[4]
+4
+>>> v1.__getitem__(4)
+4
+>>> v1[4]=40
+>>> print(v1)
+[0, 1, 2, 3, 40, 5, 6, 7]
+>>> v1.__setitem__(4,400)
+>>> print(v1)
+[0, 1, 2, 3, 400, 5, 6, 7]
+>>> v1.__delitem__(4)
+>>> print(v1)
+[0, 1, 2, 3, 5, 6, 7]
+>>> v1.__contains__(5)
+True
+>>> v1.__contains__(15)
+False
+>>> v1.__len__()
+7
+
+
+class A:
+    def __add__(self,obj):
+        print('This is Class A 左加 __add__')
+    def __radd__(self,obj):
+        print('This is Class A 的右加__radd__')
+    def __iadd__(self,obj):
+        print( 100000000)
+    
+class B:
+    pass
+
+a=A()
+b=B()
+b+a
+a+=b
+
+class Map2D:
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
+    def __sub__(self,other):
+        return Map2D(self.x-other.x,self.y-other.y)
+
+first_pos=Map2D(10,4)
+second_pos=Map2D(8,8)
+L=second_pos-first_pos
+print(L.x,L.y)
+
+__new__
+__init__
+...
+....
+__del__
+
+class中的attribute和method隐藏
+名称 _开头的名字命名attribute和method  并不能阻止熊外部访问名称 __开头的名字命名attribute和method  并不能阻止外部访问
+attribute和method 不允许双下划线开头
+_
+import *
+
+class Person:
+    def __init__(self,name,sex,privateinfo):
+        self.name=name
+        self.sex=sex
+        self.__privateinfo=list(privateinfo)
+    def name(self):
+        print(self.name)
+    def p1(self):
+        print('welcome to here')
+    def _p2(self):
+        print('welcome to nanjing')
+    def __p3(self):
+        print('welcome to hell')
+
+
+u01=Person('alice','F',[18,60])
+print(u01.name)
+print(u01.sex)
+print(u01._Person__privateinfo)
+u01.p1()
+u01._p2()
+u01._Person__p3()    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+

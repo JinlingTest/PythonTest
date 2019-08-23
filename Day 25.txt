@@ -1,0 +1,397 @@
+TABLE		dba_tables   dba_constraints
+SEQUENCE	dba_sequences
+SYNONYM		dba_synonyms
+
+VIEW	封装一条查询语句的对象 dba_views
+通过视图查询基表数据
+INDEX
+
+create view v01
+AS
+SELECT * FROM employees;
+update employees set salary=salary+100 where employee_id=107;
+update hr.v01 set salary=salary+100 where employee_id=107;
+
+
+
+create view v02
+AS
+SELECT  first_name, last_name,salary FROM   employees;
+  
+create view v03(name,year_sal)
+AS 
+SELECT last_name,salary*14 FROM employees;
+
+create view v04
+AS 
+SELECT last_name,salary*14 AS t_sal FROM employees;
+
+create OR replace view v15000
+AS
+select * from employees where salary>=15000
+WITH CHECK OPTION;
+
+create or replace VIEW v06
+AS
+SELECT employees.last_name,departments.department_name
+FROM employees,departments
+WHERE employees.department_id=departments.department_id;
+
+
+drop view v01
+
+INDEX索引---提高查询速度 减少资源消耗
+
+
+select employee_id,last_name,salary from employees where salary>=15000
+
+
+SQL> create table t20 (id number,name char(200),age number(2));
+
+Table created.
+
+SQL> insert into t20 values(1,'alice',20);
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> select 
+-- from t20 where id=1;
+
+NAME
+--------------------------------------------------------------------------------
+alice
+
+
+
+
+SQL> 
+
+
+
+
+SQL> BEGIN
+  2  FOR I IN 2..2000000 LOOP
+  3  INSERT INTO T20 VALUES(i,'aaaaaaaaaaaaaaaaaaa',20);
+  4  end loop;
+  5  commit;
+  6  end;
+  7  /
+
+PL/SQL procedure successfully completed.
+
+SQL> set timing on
+SQL> select name from t20 where id=1;
+
+NAME
+--------------------------------------------------------------------------------
+alice
+
+
+user_indexes
+all_indexes
+dba_indexes
+
+====================================================
+ 参数 数据
+oracle复用--控制 日志
+数据库备份
+
+归档模式
+arch进程 alter database archivelog
+归档目录 alter system set log_archive_dest_1='location=/u0/arch01' scope=spfile;
+
+rman target /
+RMAN>backup spfile
+backup controlfile
+backup datafile
+backup tablespace
+
+bakup database
+
+
+
+1.datafile nokey   server ok 
+
+SQL> select table_name from dba_tables where tablespace_name='TBS1';
+
+SQL> !rm /u01/app/oracle/oradata/orcl/new/tbs1.dbf
+
+SQL> !rm /u01/app/oracle/oradata/orcl/new/tbs1_2.dbf
+SQL> alter system flush buffer_cache;
+SQL> select count(*) from hr.test10;
+select count(*) from hr.test10
+*
+ERROR at line 1:
+ORA-01116: error in opening database file 9
+ORA-01110: data file 9: '/u01/app/oracle/oradata/orcl/new/tbs1_2.dbf'
+ORA-27041: unable to open file
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 3
+
+
+RMAN> sql 'alter database datafile 5,9 offline';
+
+sql statement: alter database datafile 5,9 offline
+
+RMAN> restore datafile 5,9;
+
+Starting restore at 24-JUL-19
+using channel ORA_DISK_1
+
+channel ORA_DISK_1: starting datafile backup set restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+channel ORA_DISK_1: restoring datafile 00005 to /u01/app/oracle/oradata/orcl/new/tbs1.dbf
+channel ORA_DISK_1: restoring datafile 00009 to /u01/app/oracle/oradata/orcl/new/tbs1_2.dbf
+channel ORA_DISK_1: reading from backup piece /u01/app/oracle/product/12.2.0/dbhome_1/dbs/0hu7f9r9_1_1
+channel ORA_DISK_1: piece handle=/u01/app/oracle/product/12.2.0/dbhome_1/dbs/0hu7f9r9_1_1 tag=TAG20190724T143001
+channel ORA_DISK_1: restored backup piece 1
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:03
+Finished restore at 24-JUL-19
+
+RMAN> recover datafile 5,9;
+
+Starting recover at 24-JUL-19
+using channel ORA_DISK_1
+
+starting media recovery
+media recovery complete, elapsed time: 00:00:00
+
+Finished recover at 24-JUL-19
+
+RMAN> sql 'alter database datafile 5,9 online';
+
+
+2.datafile key
+rm /u01/app/oracle/oradata/orcl/system01.dbf
+rm /u01/app/oracle/oradata/orcl/tbs2_1.dbf
+rm /u01/app/oracle/oradata/orcl/sysaux01.dbf
+rm /u01/app/oracle/oradata/orcl/undotbs01.dbf
+rm /u01/app/oracle/oradata/orcl/new/tbs1.dbf
+
+SQL> shutdown abort
+ORACLE instance shut down.
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area 1660944384 bytes
+Fixed Size                  8621376 bytes
+Variable Size            1140851392 bytes
+Database Buffers          503316480 bytes
+Redo Buffers                8155136 bytes
+Database mounted.
+ORA-01157: cannot identify/lock data file 1 - see DBWR trace file
+ORA-01110: data file 1: '/u01/app/oracle/oradata/orcl/system01.dbf'
+
+
+SQL> select status from v$instance;
+
+STATUS
+------------
+MOUNTED
+
+SQL> desc v$recover_file
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ FILE#                                              NUMBER
+ ONLINE                                             VARCHAR2(7)
+ ONLINE_STATUS                                      VARCHAR2(7)
+ ERROR                                              VARCHAR2(18)
+ CHANGE#                                            NUMBER
+ TIME                                               DATE
+ CON_ID                                             NUMBER
+
+SQL> select file#,error from v$recover_file;
+
+     FILE# ERROR
+	 
+	 
+mount
+[oracle@db1 ~]$ rman target /
+RMAN> restore datafile 1,2,3,4,5;
+RMAN> recover datafile 1,2,3,4,5;
+SQL> alter database open;
+Database altered.
+
+logfile 复用
+1 至少有一个成员
+rm /u01/app/oracle/oradata/orcl/redo01a.log
+rm /u01/app/oracle/oradata/orcl/redo02a.log
+rm /u01/app/oracle/oradata/orcl/redo03.log
+服务器继续运行
+SQL> alter database drop logfile member '/u01/app/oracle/oradata/orcl/redo01a.log';
+alter database drop logfile member '/u01/app/oracle/oradata/orcl/redo01a.log'
+*
+ERROR at line 1:
+ORA-01609: log 1 is the current log for thread 1 - cannot drop members
+ORA-00312: online log 1 thread 1: '/u01/app/oracle/oradata/orcl/redo01.log'
+ORA-00312: online log 1 thread 1: '/u01/app/oracle/oradata/orcl/redo01a.log'
+
+
+SQL> alter database drop logfile member '/u01/app/oracle/oradata/orcl/redo02a.log';
+SQL> alter database drop logfile member '/u01/app/oracle/oradata/orcl/redo03.log';
+SQL> alter system switch logfile;
+
+SQL> alter database drop logfile member '/u01/app/oracle/oradata/orcl/redo01a.log';
+
+Database altered.
+
+SQL> alter database add logfile member '/u01/app/oracle/oradata/orcl/redo01b.log' to group 1;
+SQL> alter database add logfile member '/u01/app/oracle/oradata/orcl/redo02b.log' to group 2;
+SQL> alter database add logfile member '/u01/app/oracle/oradata/orcl/redo03b.log' to group 3;
+
+Database altered.
+
+SQL> 
+
+控制文件  至少留一个副本
+
+SQL> select name from v$controlfile;
+
+NAME
+--------------------------------------------------------------------------------
+/u01/app/oracle/oradata/orcl/control01.ctl
+/u01/app/oracle/oradata/orcl/control02.ctl
+/u01/app/oracle/oradata/orcl/control03.ctl
+
+SQL> !rm /u01/app/oracle/oradata/orcl/control01.ctl
+
+SQL> !rm /u01/app/oracle/oradata/orcl/control03.ctl
+
+SQL> shutdown abort
+ORACLE instance shut down.
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area 1660944384 bytes
+Fixed Size                  8621376 bytes
+Variable Size            1140851392 bytes
+Database Buffers          503316480 bytes
+Redo Buffers                8155136 bytes
+ORA-00205: error in identifying control file, check alert log for more info
+
+
+SQL> select status from $instance;
+select status from $instance
+                   *
+ERROR at line 1:
+ORA-00911: invalid character
+
+
+
+[oracle@db1 ~]$ tail -20 /u01/app/oracle/diag/rdbms/orcl/orcl/trace/alert_orcl.log 
+Errors in file /u01/app/oracle/diag/rdbms/orcl/orcl/trace/orcl_m001_16098.trc:
+ORA-00202: control file: '/u01/app/oracle/oradata/orcl/control01.ctl'
+ORA-27037: unable to obtain file status
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 7
+ORA-205 signalled during: ALTER DATABASE   MOUNT...
+2019-07-24T15:49:08.087245+08:00
+Errors in file /u01/app/oracle/diag/rdbms/orcl/orcl/trace/orcl_m001_16098.trc:
+ORA-00202: control file: '/u01/app/oracle/oradata/orcl/control03.ctl'
+ORA-27037: unable to obtain file status
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 7
+ORA-00210: cannot open the specified control file
+ORA-00202: control file: '/u01/app/oracle/oradata/orcl/control01.ctl'
+ORA-27037: unable to obtain file status
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 7
+Checker run found 2 new persistent data failures
+2019-07-24T15:49:10.138679+08:00
+Using default pga_aggregate_limit of 2048 MB
+[oracle@db1 ~]$ cp 
+
+[oracle@db1 ~]$ cp /u01/app/oracle/oradata/orcl/control02.ctl /u01/app/oracle/oradata/orcl/control01.ctl
+[oracle@db1 ~]$ cp /u01/app/oracle/oradata/orcl/control02.ctl /u01/app/oracle/oradata/orcl/control03.ctl
+
+SQL> startup force;
+ORACLE instance started.
+
+Total System Global Area 1660944384 bytes
+Fixed Size                  8621376 bytes
+Variable Size            1140851392 bytes
+Database Buffers          503316480 bytes
+Redo Buffers                8155136 bytes
+Database mounted.
+Database opened.
+SQL> 
+
+
+
+
+
+
+参数
+
+SQL> select status from v$instance;
+
+STATUS
+------------
+OPEN
+
+SQL> show parameter spfile
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+spfile                               string      /u01/app/oracle/product/12.2.0
+                                                 /dbhome_1/dbs/spfileorcl.ora
+SQL> 
+
+
+参数
+spfileorcl.ora
+initorcl.ora
+
+SQL> select dbid from v$database;
+
+      DBID
+----------
+1541476942
+
+SQL> startup nomount
+ORA-01078: failure in processing system parameters
+LRM-00109: could not open parameter file '/u01/app/oracle/product/12.2.0/dbhome_1/dbs/initorcl.ora'
+
+
+[oracle@db1 ~]$ rman target /
+RMAN >set DBID 1541476942
+RMAN> startup nomount  RMAN中可以无参数文件启动
+RMAN >restore spfile from AUTOBACKUP; 还原
+RMAN> shutdown abort; 关闭无参启动的实例
+
+Oracle instance shut down
+
+RMAN> startup 使用还原好的参数文件正常启动服务器
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,122 @@
+将member server 退出域
+独立服务器 (工作组)
+
+从成员服务器(功能 工具)或工作站登录域管理域资源
+
+域中组的管理
+组的类型 安全组  通讯组  建议创建安全组
+组的作用域  本地域组(限于本域使用 )
+			全局组 通用组 （不限于在本域使用 多域之间有信任关系均可使用）
+
+内置组
+内置的本地域组
+Administrators
+Backup Operators
+Print  Operators
+Account Operators			
+Network Configuration Operators
+Users
+
+内置的全局组
+Domain Admins
+Domain users
+Domain Controllers
+Domain Computers
+
+内置的通用组
+Enterprise Admins
+Schema Admins
+
+开启AD的回收站  ........
+
+AD对象删除 
+
+example.com
+2DC 1M
+
+将DC降级(删AD DS)----成员服务器(本地安全帐户数据库 SAM DB)
+
+成员服务器-----工作组
+将域中最后一台DC降级(删AD DS)----工作组 服务器
+
+
+---------------
+文件系统 
+windows FAT32/NTFS
+Linux XFS
+
+安全控制
+NFTS文件安全 
+拒绝
+
+
+标准文件权限 五种
+1 Read  内容 属性(只读 隐藏) 针对该文件的权限设置
+2 Write 改内容 属性 
+3 Read+Execute 可执行文件 可以运行
+4 Modify 1+2+3+删除文件
+5 FULL Control  修改权限 (取得所有权)
+
+文件创建者 属主
+
+标准文件夹权限 五种
+1 读取 看子文件夹和文件名字  属性
+2 写入 创建子文件夹和文件 属性
+3 Read+Execute 读取+遍历文件夹 （文件（夹）均继承）
+4 列出文件夹内容  读取+遍历文件夹  
+  以上两个权限有细微不同点 在“继承”特征 (列出文件夹内容 只会被子文件夹继承 文件不继承)  
+5 Modify 以上 +删除文件
+5 FULL C  以上 修改权限 (取得所有权)
+
+
+有效权限
+1.继承
+  在下层 不想继承上层的权限 可以设置禁止继承 
+
+文件 的所有者 有特殊权限 （修改权限）
+administrators 有特殊权限 (取得所有权)
+
+  授权 默认继承----影响下层
+      不想影响下层
+
+2. 累加 user+group
+3。拒绝优先
+
+
+	  
+	  
+有效权限	 
+
+特殊权限  
+
+所有者
+
+文件复制之后权限？  继承目标文件夹的权限
+文件移动之后权限？  继承目标文件夹的权限
+copy move 到FAT32   权限的元数据将会清除
+
+压缩
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

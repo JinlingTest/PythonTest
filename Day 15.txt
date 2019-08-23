@@ -1,0 +1,223 @@
+使用firewalld限制网络通信
+
+Linux 内核级别netfilter 网络过滤 
+      传入
+	  传出
+	  转发
+	  
+	  检查
+	  修改
+	  丢弃
+	  拒绝
+	  
+	  firewalld服务 firewalld工具
+	  
+	  预定义的设置 (ping ssh     http)
+	  
+	  区域
+	  public 除非与传出流量相关，或者是ssh dhcp-client匹配 否则拒绝传入流量
+	  home   除非与传出流量相关，或者是ssh dhcp-client mdns ipp-client samba-client匹配 否则拒绝传入流量
+	  internal  同Home
+	  external 除非与传出流量相关，或者是ssh匹配 否则拒绝传入流量 
+				通过此区域转发IPV4流量将进行伪装
+	  work   除非与传出流量相关，或者是ssh dhcp-client ipp-client匹配 否则拒绝传入流量
+      dmz	  除非与传出流量相关，或者是ssh匹配 否则拒绝传入流量
+	  block   除非与传出流量相关，否则拒绝所有传入流量
+	  drop    除非与传出流量相关，否则丢弃所有传入流量
+	  trusted 允许所有传入流量
+	  
+	  
+	  man firewall-cmd
+	  --add-source=CIDR   (192.168.0.20   192.168.0.0/24)
+	  --change-source
+	  --remove-source=CIDR
+      --list-source
+	  
+	  --add-interface=接口
+      --change-interface
+      ......	  
+	  
+	  
+	  以上源 接口 服务 端口 伪装 .....
+	  还有富规则
+	  
+	  --permanent
+	  --reload
+	    884  man firewall-cmd
+  885  firewall-cmd --get-default-zone
+  886  firewall-cmd --set-default-zone=dmz
+  887  firewall-cmd --get-default-zone
+  888  firewall-cmd --set-default-zone=home
+  889  firewall-cmd --get-default-zone
+  890  firewall-cmd --set-default-zone=trusted
+  891  firewall-cmd --get-default-zone
+  892* firewall-cmd --set-default-zo
+  893  firewall-cmd --get-zone
+  894  firewall-cmd --get-zones
+  895  firewall-cmd --get-active-zones
+  896  firewall-cmd --set-default-zone=public
+  897  firewall-cmd --get-active-zones
+  898  firewall-cmd --set-default-zone=dmz
+  899  firewall-cmd --permanent --zonedmz --add-source=12.168.0.0/24
+  900  firewall-cmd --permanent --zone=dmz --add-source=12.168.0.0/24
+  901  firewall-cmd --permanent --zone=dmz --add-source=192.168.0.0/24
+  902  firewall-cmd --set-default-zone=public
+  903  firewall-cmd --get-default-zone
+  904  firewall-cmd --zone=public --list-all
+  905  firewall-cmd --permanent --zone=public --list-all
+  906  firewall-cmd --get-default-zone
+  907  firewall-config
+  908  firewall-cmd --permanent --zone=public --list-all
+  909  firewall-cmd  --zone=public --list-all
+  910  firewall-cmd  --zone=public --add-port 8000/tcp
+  911  firewall-cmd  --reload
+  912  firewall-cmd --zone=public --list-all
+  913  firewall-cmd  --permanent --zone=public --add-port 8000/tcp
+  914  firewall-cmd  --reload
+  915  history |tail -10
+  916  yum install mysql*
+  917  yum install mysql-server
+  918  yum install mariadb*
+  919  systemctl status mariadb
+  920  systemctl enable mariadb
+  921  systemctl start mariadb
+  922  mysql -uroot -p
+  923  firewall-cmd --zone=public --add-service=mysql
+  924  history 
+  925  firewall-cmd --zone=public --list-all
+  926  firewall-cmd --reload
+  927  yum install vsftpd
+  928  firewall-cmd --zone=public --add-service=ftp
+  929  firewall-cmd --permanent --zone=public --add-service=ftp
+	  firewall-cmd --permanent --zone=public --add-service=ftp
+	  
+	  
+	 SAMBA
+     安
+	 配
+	 启动  smb
+	 firewall-cmd --permanent --zone=public --add-service=samba
+	 firewall-cmd --reload
+	 
+	  
+	  914  systemctl restart smb
+  915  useradd zhao
+  916  passwd zhao
+  917  smbpaswd -a zhao
+  918  smbpasswd -a zhao
+  919  useradd qian
+  920  smbpasswd -a qian
+  921  useradd li
+  922  smbpasswd -a li
+  
+====
+ operation
+ 对于列表+ * 类似string
+ in
+--------- list function
+ v1.append(11)
+ len(v1)
+ v1.insert(2,100)
+ v1.index(1000)
+>>> print(v1)
+[1, 2, 3, 8, 9]
+>>> v1.append(10)
+>>> print(v1)
+[1, 2, 3, 8, 9, 10]
+>>> v1+[1]
+[1, 2, 3, 8, 9, 10, 1]
+>>> print(v1)
+[1, 2, 3, 8, 9, 10]
+>>> print(len(v1))
+6
+>>> v1.insert(3,100)
+>>> print(v1)
+[1, 2, 3, 100, 8, 9, 10]
+>>> print(v1.index(100))
+3
+>>> print(v1.index(1000))
+ 
+range
+>>> v1=list(range(1,10))
+>>> print(v1)
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> v1=list(range(1,10,2))
+>>> print(v1)
+[1, 3, 5, 7, 9]
+>>> v1=list(range(1,10,3))
+>>> print(v1)
+[1, 4, 7]
+
+v1=['aaa','bbb','ccc','ddd']
+num=0
+while num<=3:
+  print('hi'+v1[num])
+  num+=1
+
+
+
+
+hi aaa
+hi bbb
+hi ccc
+hi ddd
+v1=['aaa','bbb','ccc','ddd','eee']
+num=0
+while num<len(v1):
+  print('hi '+v1[num]+' !')
+  num+=1
+  
+v1=['aaa','bbb','ccc','ddd','eee']
+for x in v1:
+    print('hi '+x)
+  
+
+
+
+ for  
+while True:
+    print('Please Input your choose')
+    print('如果你需要加法,请输入+')
+    print('如果你需要减法,请输入-')
+    print('如果你需要乘法,请输入*')
+    print('如果你需要除法,请输入/')
+    print('如果退出，输入Q')
+    v1=input('Your Choose: ')
+
+    if v1=='Q':
+        break
+    elif v1=='+':
+        n1=input('Enter First Num: ')
+        n2=input('Enter Second Num: ')
+        print('你的答案是：'+str(int(n1)+int(n2)))
+    elif v1=='-':
+        n1=input('Enter First Num: ')
+        n2=input('Enter Second Num: ')
+        print('你的答案是：'+str(int(n1)-int(n2)))
+    elif v1=='*':
+        n1=input('Enter First Num: ')
+        n2=input('Enter Second Num: ')
+        print('你的答案是：'+str(int(n1)*int(n2)))
+    elif v1=='/':
+        n1=input('Enter First Num: ')
+        n2=input('Enter Second Num: ')
+        print('你的答案是：'+str(int(n1)/int(n2)))
+    else:
+        print('Please input:')
+
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  

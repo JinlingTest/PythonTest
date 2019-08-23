@@ -1,0 +1,297 @@
+apache.org
+2.4
+
+Apache (HTTPD)
+Hadoop
+tomcat
+
+Web Server
+TCP/IP   Hyper Text Transport Protocal
+TCP:80
+SSL:443
+yum install httpd httpd-devel
+vim /etc/？？？？
+rpm -ql httpd|grep conf
+  /etc/httpd/conf/httpd.conf
+  /etc/httpd/conf.d/
+
+
+systemctl enable httpd
+systemctl start httpd
+firewall-cmd --permanent --zone=public --add-service=http
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --reload
+
+测试 firefox http://127.0.0.1  图形
+     elinks http://127.0.0.1  菜单
+	 curl http://127.0.0.1    字符
+	 
+  
+   21  yum -y install httpd httpd-devel
+   22  rpm -ql httpd
+   23  rpm -ql httpd|grep conf
+   24  systemctl list-units --type=service|grep httpd
+   25  systemctl list-units --type=service --all|grep httpd
+   26  systemctl enable httpd
+   27  systemctl list-units --type=service --all|grep httpd
+   28  systemctl start httpd
+   29  systemctl status httpd
+   31  systemctl enable firewalld
+   32  systemctl start firewalld
+   33  firewall-cmd --permanent --zone=public --add-service=http
+   34  firewall-cmd --permanent --zone=public --add-service=https
+   35  firewall-cmd --reload
+   36  yum install elinks
+   37  elinks http://127.0.0.1
+   38  curl http://127.0.0.1
+
+LAMP 
+LNMP
+Linux
+Apache/Nginx
+MySQL(MariaDB)
+PHP/Python/Perl
+[root@server00 ~]# netstat -atpnu|grep httpd
+[root@server00 ~]# ps -ef|grep httpd
+[root@server00 ~]# yum install mariadb  mariadb-server php php-mysql
+   52  yum install mariadb  mariadb-server php php-mysql
+   53  systemctl enable mariadb.service 
+   54  systemctl start mariadb.service 
+   55  ps -ef|grep mariadb
+   56  netstat -atpnu|grep mariadb
+   57  netstat -atpnu|grep mysqld
+   58  firewall-cmd --permanent --zone=public --add-service=mysql
+   59  firewall-cmd --reload
+   60  mysql -uroot -p
+       mysql_secure_installation
+   61  history 
+   
+   apache支持PHP
+   /etc/httpd/conf/httpd.conf
+   285行添加     AddType application/x-httpd-php .php
+   164行加     DirectoryIndex index.html index.php 
+   [root@server00 ~]# 
+[root@server00 ~]# systemctl restart httpd
+[root@server00 ~]# grep DocumentRoot /etc/httpd/conf/httpd.conf
+# DocumentRoot: The directory out of which you will serve your
+DocumentRoot "/var/www/html"
+    # access content that does not live under the DocumentRoot.
+[root@server00 ~]# ls /var/www/html/
+[root@server00 ~]# echo '<?php' >> /var/www/html/index.php
+[root@server00 ~]# echo 'phpinfo();' >> /var/www/html/index.php  
+[root@server00 ~]# echo '?>' >> /var/www/html/index.php          
+[root@server00 ~]# cat /var/www/html/index.php
+<?php
+phpinfo();
+?>
+[root@server00 ~]# elinks http://127.0.0.1
+
+[root@server00 ~]# unzip UCenter_1.5.0_SC_UTF8.zip  -d aa
+ 81  ls aa
+   82  mkdir /var/www/html/ucadmin
+   83  mv aa/upload/* /var/www/html/ucadmin
+   84  ls -l /var/www/html/ucadmin
+   85  chown -R apache.apache /var/www/html/ucadmin/data
+# chmod -R 777 /var/www/html/ucadmin/data 
+
+http://127.0.0.1/ucadmin/install/
+[root@server00 ~]# sed -i '/short_open_tag/s/Off/On/' /etc/php.ini
+[root@server00 ~]# grep short_open_tag /etc/php.ini               
+; short_open_tag
+short_open_tag = On
+[root@server00 ~]# systemctl restart httpd
+[root@server00 ~]# elinks http://127.0.0.1/ucadmin/install 
+
+"/etc/httpd/conf/httpd.conf
+Include conf.modules.d/*.conf
+
+cat conf.modules.d/00-mpm.conf
+MPM
+prefork 默认apache 的MPM 最稳定 进程彼此独立
+systemctl status httpd
+prefork用独立的进程处理请求
+1-2-4-----32
+
+worker 性能较好  多进程--多线程  对于资源开销较小 apache2.0趋势
+
+高流量HTTP服务器建议使用worker
+
+apache 
+web服务器
+
+192.168.0.20 
+注册DNS域名
+www.example.com    /var/www/html/
+www.test.com		/var/www/test
+www.abc.com			/var/www/abc
+
+DNS服务器
+[root@server00 ~]# tail -2 /etc/resolv.conf 
+nameserver 192.168.0.201
+nameserver 8.8.8.8
+[root@server00 ~]# tail -6 /etc/sysconfig/network-scripts/ifcfg-ens33
+GATEWAY=192.168.0.2
+DNS1=192.168.0.201
+DNS2=8.8.8.8
+DOMAIN=example.com
+IPV6_PRIVACY=no
+ZONE=public
+
+
+[root@server00 httpd]# cat /etc/httpd/conf.d/test.com.conf
+<VirtualHost 192.168.0.20:80>
+ServerAdmin root@test.com
+ServerName www.test.com
+DocumentRoot "/var/www/test"
+CustomLog "logs/test_access_log" combined
+ErrorLog "logs/test_error_log"
+</VirtualHost>
+[root@server00 httpd]# cat /etc/httpd/conf.d/abc.com.conf 
+<VirtualHost 192.168.0.20:80>
+ServerAdmin root@abc.com
+ServerName www.abc.com
+DocumentRoot "/var/www/abc"
+CustomLog "logs/abc_access_log" combined
+ErrorLog "logs/abc_error_log"
+</VirtualHost>
+[root@server00 httpd]# cat /etc/httpd/conf.d/example.com.conf
+<VirtualHost 192.168.0.20:80>
+ServerAdmin root@example.com
+ServerName www.example.com
+DocumentRoot "/var/www/html"
+CustomLog "logs/access_log" combined
+ErrorLog "logs/error_log"
+</VirtualHost>
+
+
+www.abc.com/
+默认页面
+/etc/httpd/conf/httpd.conf
+ DirectoryIndex index.html index.php
+ 
+ 403
+ Test 123.. (welcome)
+ 无法访问页面 403错误
+ 列表
+ [root@server00 ~]# cat /etc/httpd/conf.d/welcome.conf 
+# 
+# This configuration file enables the default "Welcome" page if there
+# is no default index page present for the root URL.  To disable the
+# Welcome page, comment out all the lines below. 
+#
+# NOTE: if this file is removed, it will be restored on upgrades.
+#
+#<LocationMatch "^/+$">
+#    Options -Indexes
+#    ErrorDocument 403 /.noindex.html
+#</LocationMatch>
+
+<VirtualHost 192.168.0.20:80>
+ServerAdmin root@abc.com
+ServerName www.abc.com
+DocumentRoot "/var/www/abc"
+CustomLog "logs/abc_access_log" combined
+ErrorLog "logs/abc_error_log"
+<Directory />
+Options Indexes FollowSymlinks
+
+</Directory>
+</VirtualHost>
+
+<VirtualHost 192.168.0.20:80>
+ServerAdmin root@abc.com
+ServerName www.abc.com
+DocumentRoot "/var/www/abc"
+CustomLog "logs/abc_access_log" combined
+ErrorLog "logs/abc_error_log"
+<Directory "/var/www/abc/soft/a/b/c/d/">
+Options Indexes FollowSymlinks
+
+</Directory>
+Alias /download "/var/www/abc/soft/a/b/c/d/"
+</VirtualHost>
+
+
+没有证书颁发机构
+自颁发
+
+# yum install crypto-utils
+
+genkey www.test.com
+ You are now generating a new keypair which will be used to encrypt all ↑ │            
+           │ SSL traffic to the server named www.test.com.                          ▮ │            
+           │ Optionally you can also create a certificate request and send it to a  ▒ │            
+           │ certificate authority (CA) for signing.                                ▒ │            
+           │                                                                        ▒ │            
+           │ The key will be stored in                                              ▒ │            
+           │     /etc/pki/tls/private/www.test.com.key                              ▒ │            
+           │ The certificate stored in                                              ▒ │            
+           │     /etc/pki/tls/certs/www.test.com.crt       
+		   
+		   
+chmod 600 	/etc/pki/tls/private/www.test.com.key
+# yum install mod_ssl
+grep -v -e '#' -e '^$' /etc/httpd/conf.d/ssl.conf > /etc/httpd/conf.d/test_ssl.conf
+[root@server00 ~]# cat /etc/httpd/conf.d/test_ssl.conf
+<VirtualHost 192.168.0.20:443>
+ErrorLog logs/test_ssl_error_log
+TransferLog logs/test_ssl_access_log
+LogLevel warn
+SSLEngine on
+SSLProtocol all -SSLv2 -SSLv3
+SSLCipherSuite HIGH:3DES:!aNULL:!MD5:!SEED:!IDEA
+SSLCertificateFile /etc/pki/tls/certs/www.test.com.crt
+SSLCertificateKeyFile /etc/pki/tls/private/www.test.com.key
+</VirtualHost> 
+
+ systemctl restart httpd
+
+
+
+
+
+
+
+
+	   
+		   
+		   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
